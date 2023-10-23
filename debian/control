@@ -1,0 +1,19 @@
+Source: libslimbook
+Section: libs
+Priority: optional
+Maintainer: Slimbook <dev@slimbook.es>
+Build-Depends: debhelper (>=9), meson, ninja-build, g++
+Standards-Version: 3.9.7
+Homepage: https://github.com/Slimbook-Team/libslimbook
+
+Package: libslimbook
+Architecture: amd64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Slimbook hardware identification library
+ This shared library identifies Slimbook hardware model
+
+Package: libslimbook-dev
+Architecture: any
+Depends: ${misc:Depends}, libslimbook
+Description: libslimbook development files
+ Development files (headers) for libslimbook
