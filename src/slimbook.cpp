@@ -114,6 +114,30 @@ const char* slb_info_product_serial()
     }
 }
 
+const char* slb_info_bios_version()
+{
+    try {
+        buffer.clear();
+        read_device(SYSFS_DMI"bios_version",buffer);
+        return buffer.c_str();
+    }
+    catch (...) {
+        return nullptr;
+    }
+}
+
+const char* slb_info_ec_firmware_release()
+{
+    try {
+        buffer.clear();
+        read_device(SYSFS_DMI"ec_firmware_release",buffer);
+        return buffer.c_str();
+    }
+    catch (...) {
+        return nullptr;
+    }
+}
+
 uint32_t slb_info_get_model()
 {
     string product = slb_info_product_name();
