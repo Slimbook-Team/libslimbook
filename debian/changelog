@@ -1,8 +1,15 @@
-libslimbook (1.1) jammy; urgency=medium
+libslimbook (1.2) jammy; urgency=medium
 
   * Added Hero keyboard backlight get/set support
 
- -- Slimbook <dev@slimbook.es>  Sun, 29 Oct 2023 22:40:44 +0100
+ -- Slimbook <dev@slimbook.es>  Sun, 29 Oct 2023 22:50:48 +0100
+
+libslimbook (1.1) jammy; urgency=medium
+
+  * Added bios and ec version getters
+  * Fixed model mask constants
+
+ -- Slimbook <dev@slimbook.es>  Wed, 25 Oct 2023 12:06:18 +0200
 
 libslimbook (1.0) jammy; urgency=medium
 
