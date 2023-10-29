@@ -1,3 +1,9 @@
+libslimbook (1.1) jammy; urgency=medium
+
+  * Added Hero keyboard backlight get/set support
+
+ -- Slimbook <dev@slimbook.es>  Sun, 29 Oct 2023 22:40:44 +0100
+
 libslimbook (1.0) jammy; urgency=medium
 
   * Initial release.
