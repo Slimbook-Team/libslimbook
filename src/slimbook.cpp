@@ -25,10 +25,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <fstream>
 #include <thread>
 #include <vector>
+#include <sstream>
+#include <iomanip>
 
 using namespace std;
 
 #define SYSFS_DMI "/sys/devices/virtual/dmi/id/"
+#define SYSFS_QC71 "/sys/devices/platform/qc71_laptop/"
 
 thread_local std::string buffer;
 
@@ -53,6 +56,15 @@ static void read_device(string path,string& out)
 
     file.open(path.c_str());
     std::getline(file,out);
+    file.close();
+}
+
+static void write_device(string path,string in)
+{
+    ofstream file;
+
+    file.open(path.c_str());
+    file<<in;
     file.close();
 }
 
@@ -107,6 +119,30 @@ const char* slb_info_product_serial()
     try {
         buffer.clear();
         read_device(SYSFS_DMI"product_serial",buffer);
+        return buffer.c_str();
+    }
+    catch (...) {
+        return nullptr;
+    }
+}
+
+const char* slb_info_bios_version()
+{
+    try {
+        buffer.clear();
+        read_device(SYSFS_DMI"bios_version",buffer);
+        return buffer.c_str();
+    }
+    catch (...) {
+        return nullptr;
+    }
+}
+
+const char* slb_info_ec_firmware_release()
+{
+    try {
+        buffer.clear();
+        read_device(SYSFS_DMI"ec_firmware_release",buffer);
         return buffer.c_str();
     }
     catch (...) {
@@ -171,4 +207,84 @@ uint32_t slb_info_is_module_loaded()
     }
     
     return 0;
+}
+
+int slb_kbd_backlight_get(uint32_t model, uint32_t* value)
+{
+    if (value == 0) {
+        return EINVAL;
+    }
+    
+    if (model == 0) {
+        model = slb_info_get_model();
+    }
+    
+    if (model == 0) {
+        return ENOENT;
+    }
+    
+    if ((model & SLB_MODEL_HERO) > 0) {
+        try {
+            string svalue;
+            uint32_t rgb;
+            uint32_t ival;
+            
+            read_device(SYSFS_QC71"kbd_backlight_rgb_red",svalue);
+            ival = std::stoi(svalue,0,16);
+            rgb = ival<<16;
+            
+            read_device(SYSFS_QC71"kbd_backlight_rgb_green",svalue);
+            ival = std::stoi(svalue,0,16);
+            rgb = rgb | (ival<<8);
+            
+            read_device(SYSFS_QC71"kbd_backlight_rgb_blue",svalue);
+            ival = std::stoi(svalue,0,16);
+            rgb = rgb | ival;
+            
+            *value = rgb;
+            
+            return 0;
+        }
+        catch(...) {
+            return EIO;
+        }
+    }
+    
+    return ENOENT;
+}
+
+int slb_kbd_backlight_set(uint32_t model, uint32_t value)
+{
+   if (model == 0) {
+        model = slb_info_get_model();
+    }
+    
+    if (model == 0) {
+        return ENOENT;
+    }
+    
+    if ((model & SLB_MODEL_HERO) > 0) {
+        stringstream ss;
+        try {
+            uint32_t red = (value & 0x00ff0000) >> 16;
+            ss<<"0x"<<std::setfill('0')<<std::setw(2)<<red;
+            write_device(SYSFS_QC71"kbd_backlight_rgb_red",ss.str());
+            
+            ss.str("");
+            uint32_t green = (value & 0x0000ff00) >> 8;
+            ss<<"0x"<<std::setfill('0')<<std::setw(2)<<green;
+            write_device(SYSFS_QC71"kbd_backlight_rgb_green",ss.str());
+            
+            uint32_t blue = (value & 0x000000ff);
+            ss<<"0x"<<std::setfill('0')<<std::setw(2)<<blue;
+            write_device(SYSFS_QC71"kbd_backlight_rgb_blue",ss.str());
+            
+            return 0;
+        }
+        catch(...) {
+            return EIO;
+        }
+    }
+    
+    return ENOENT;
 }

@@ -3,7 +3,8 @@ libslimbook = shared_library('slimbook', 'slimbook.cpp', install: true, version:
 
 executable('slimbookctl', ['slimbookctl.cpp'],
     link_with: libslimbook,
-    install: true
+    install: true,
+    install_mode: ['rwsr-xr-x','root','root']
     )
 
 install_headers('slimbook.h')

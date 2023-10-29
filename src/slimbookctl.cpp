@@ -21,6 +21,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "slimbook.h"
 
 #include <iostream>
+#include <iomanip>
 #include <string>
 
 using namespace std;
@@ -54,7 +55,8 @@ int main(int argc,char* argv[])
         command = argv[1];
     }
     else {
-    
+        show_help();
+        return 0;
     }
     
     if (command == "info") {
@@ -64,6 +66,37 @@ int main(int argc,char* argv[])
     
     if (command == "help") {
         show_help();
+        return 0;
+    }
+    
+    if (command == "set-kbd-backlight") {
+        if (argc<2) {
+            return 1; //better return value
+        }
+        
+        uint32_t value = std::stoi(argv[2],0,16);
+        
+        int status = slb_kbd_backlight_set(0,value);
+        
+        if (status > 0) {
+            cerr<<"Failed to set keyboard backlight:"<<status<<endl;
+            return status;
+        }
+        
+        return 0;
+    }
+    
+    if (command == "get-kbd-backlight") {
+        uint32_t value;
+        int status = slb_kbd_backlight_get(0,&value);
+        
+        if (status > 0) {
+            cerr<<"Failed to retrieve keyboard backlight:"<<status<<endl;
+            return status;
+        }
+        
+        cout<<std::hex<<std::setw(6)<<std::setfill('0')<<value<<endl;
+        
         return 0;
     }
     
