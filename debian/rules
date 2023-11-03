@@ -6,4 +6,8 @@
 
 %:
 	dh $@
-	
+
+override_dh_fixperms:
+	dh_fixperms
+	chmod 4755 debian/libslimbook1/usr/bin/slimbookctl
+
