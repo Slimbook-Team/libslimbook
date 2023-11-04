@@ -1,3 +1,9 @@
+libslimbook (1.2.2) jammy; urgency=medium
+
+  * Added missing QC71 devices to database.
+
+ -- Slimbook <dev@slimbook.es>  Sat, 04 Nov 2023 09:12:15 +0100
+
 libslimbook (1.2.1) jammy; urgency=medium
 
   * Fixed debian package striping setuid flag
