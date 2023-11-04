@@ -272,7 +272,7 @@ int slb_kbd_backlight_set(uint32_t model, uint32_t value)
         stringstream ss;
         try {
             uint32_t red = (value & 0x00ff0000) >> 16;
-            ss<<"0x"<<std::setfill('0')<<std::setw(2)<<red;
+            ss<<std::hex<<"0x"<<std::setfill('0')<<std::setw(2)<<red;
             write_device(SYSFS_QC71"kbd_backlight_rgb_red",ss.str());
             
             ss.str("");
@@ -281,6 +281,7 @@ int slb_kbd_backlight_set(uint32_t model, uint32_t value)
             write_device(SYSFS_QC71"kbd_backlight_rgb_green",ss.str());
             
             uint32_t blue = (value & 0x000000ff);
+            ss.str("");
             ss<<"0x"<<std::setfill('0')<<std::setw(2)<<blue;
             write_device(SYSFS_QC71"kbd_backlight_rgb_blue",ss.str());
             
