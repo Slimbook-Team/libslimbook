@@ -1,3 +1,9 @@
+libslimbook (1.2.3) jammy; urgency=medium
+
+  * Fixed bad Hero backlight setting
+
+ -- Slimbook <dev@slimbook.es>  Sat, 04 Nov 2023 16:59:28 +0100
+
 libslimbook (1.2.2) jammy; urgency=medium
 
   * Added missing QC71 devices to database.
