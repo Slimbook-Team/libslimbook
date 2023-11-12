@@ -19,6 +19,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include "slimbook.h"
+#include "configuration.h"
 
 #include <string>
 #include <cstring>
@@ -27,12 +28,16 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <vector>
 #include <sstream>
 #include <iomanip>
+#include <iostream>
 
 using namespace std;
 
 #define SYSFS_DMI "/sys/devices/virtual/dmi/id/"
 #define SYSFS_QC71 "/sys/devices/platform/qc71_laptop/"
 #define SYSFS_CLEVO "/sys/devices/platform/clevo_platform/"
+
+#define MODULE_QC71 "qc71_laptop"
+#define MODULE_CLEVO "clevo_platform"
 
 thread_local std::string buffer;
 
@@ -103,6 +108,21 @@ static vector<string> get_modules()
     file.close();
     
     return modules;
+}
+
+static uint32_t get_model_platform(uint32_t model)
+{
+    database_entry_t* entry = database;
+
+    while (entry->model > 0) {
+        if (model == entry->model) {
+            return entry->platform;
+        }
+
+        entry++;
+    }
+
+    return SLB_PLATFORM_UNKNOWN;
 }
 
 const char* slb_info_product_name()
@@ -212,11 +232,11 @@ uint32_t slb_info_is_module_loaded()
     vector<string> modules = get_modules();
     
     for (string mod : modules) {
-        if (platform == SLB_PLATFORM_QC71 and mod == "qc71_laptop") {
+        if (platform == SLB_PLATFORM_QC71 and mod == MODULE_QC71) {
             return 1;
         }
         
-        if (platform == SLB_PLATFORM_CLEVO and mod == "clevo_platform") {
+        if (platform == SLB_PLATFORM_CLEVO and mod == MODULE_CLEVO) {
             return 1;
         }
     }
@@ -324,8 +344,25 @@ int slb_config_load(uint32_t model)
         return ENOENT;
     }
     
+    // uint32_t platform = get_model_platform(model);
+    bool module_loaded = slb_info_is_module_loaded();
+
+    Configuration conf;
+    try {
+        conf.load();
+    }
+    catch(...) {
+        return EIO;
+    }
     
-    
+    if (module_loaded and model == SLB_MODEL_HERO_RPL_RTX) {
+        uint32_t backlight;
+
+        if (conf.find_u32("qc71.hero.backlight",backlight)) {
+            slb_kbd_backlight_set(model,backlight);
+        }
+    }
+
     return 0;
 }
 
@@ -338,8 +375,32 @@ int slb_config_store(uint32_t model)
     if (model == 0) {
         return ENOENT;
     }
+
+    uint32_t platform = get_model_platform(model);
+    bool module_loaded = slb_info_is_module_loaded();
     
-    
+    Configuration conf;
+
+    try {
+        conf.load();
+
+        conf.set_u32("version",1);
+        conf.set_u32("model",model);
+        conf.set_u32("platform",platform);
+
+        if (module_loaded and model == SLB_MODEL_HERO_RPL_RTX) {
+            uint32_t backlight = 0;
+
+            slb_kbd_backlight_get(model,&backlight);
+            conf.set_u32("qc71.hero.backlight",backlight);
+        }
+
+        conf.store();
+    }
+    catch(...) {
+        cerr<<"Something went wrong"<<endl;
+        return EIO;
+    }
     
     return 0;
 }

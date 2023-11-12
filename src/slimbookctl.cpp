@@ -100,5 +100,17 @@ int main(int argc,char* argv[])
         return 0;
     }
     
+    if (command == "config-load") {
+        clog<<"loading slimbook configuration:";
+        int status = slb_config_load(0);
+        clog<<status<<endl;
+    }
+
+    if (command == "config-store") {
+        clog<<"storing slimbook configuration:";
+        int status = slb_config_store(0);
+        clog<<status<<endl;
+    }
+
     return 0;
 }
