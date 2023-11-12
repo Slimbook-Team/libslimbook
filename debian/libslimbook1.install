@@ -1,2 +1,4 @@
 /usr/lib/*/lib*.so.*
 /usr/bin
+/usr/lib/systemd/system/
+/usr/lib/udev/rules.d/
