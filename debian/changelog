@@ -1,3 +1,11 @@
+libslimbook (1.5) jammy; urgency=medium
+
+  * Added support for qc71 features
+  * Added some kernel info functions
+  * Cli info command shows more information
+
+ -- Slimbook <dev@slimbook.es>  Mon, 13 Nov 2023 15:57:17 +0100
+
 libslimbook (1.4) jammy; urgency=medium
 
   * Added a settings service
