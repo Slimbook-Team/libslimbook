@@ -77,6 +77,21 @@ extern "C" uint32_t slb_info_get_platform();
 /* Checks if platform module is loaded */
 extern "C" uint32_t slb_info_is_module_loaded();
 
+/* Gets system uptime in seconds */
+extern "C" int64_t slb_info_uptime();
+
+/* Gets kernel version (long string) */
+extern "C" const char* slb_info_kernel();
+
+/* Gets current boot cmdline */
+extern "C" const char* slb_info_cmdline(); 
+
+/* Gets installed system memory */
+extern "C" uint64_t slb_info_total_memory();
+
+/* Gets available system memory (not used by any process or buffer) */
+extern "C" uint64_t slb_info_available_memory();
+
 /* Sets keyboard backlight color. Set model to 0 to guess it */
 extern "C" int slb_kbd_backlight_get(uint32_t model, uint32_t* color);
 
@@ -88,3 +103,21 @@ extern "C" int slb_config_load(uint32_t model);
 
 /* Stores configuration from driver to disk */
 extern "C" int slb_config_store(uint32_t model);
+
+/* Gets Fn lock status */
+extern "C" int slb_qc71_fn_lock_get(uint32_t* value);
+
+/* Sets Fn lock */
+extern "C" int slb_qc71_fn_lock_set(uint32_t value);
+
+/* Gets Super lock status */
+extern "C" int slb_qc71_super_lock_get(uint32_t* value);
+
+/* Gets Super lock status */
+extern "C" int slb_qc71_super_lock_set(uint32_t value);
+
+/* Gets Silent mode status */
+extern "C" int slb_qc71_silent_mode_get(uint32_t* value);
+
+/* Sets Silent mode */
+extern "C" int slb_qc71_silent_mode_set(uint32_t value);

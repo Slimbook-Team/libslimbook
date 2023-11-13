@@ -23,6 +23,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <map>
 
 using namespace std;
 
@@ -38,13 +39,52 @@ void show_help()
 
 void show_info()
 {
+    map<int,string> yesno = {{0,"no"},{1,"yes"}};
+    
+    cout<<"kernel:"<<slb_info_kernel()<<"\n";
+    
+    int64_t uptime = slb_info_uptime();
+    int64_t h = uptime / 3600;
+    int64_t m = (uptime / 60) % 60;
+    int64_t s = uptime % 60;
+    
+    cout<<"uptime:"<<h<<"h "<<m<<"m "<<s<<"s\n";
+    uint64_t tr,ar;
+    
+    tr = slb_info_total_memory();
+    ar = slb_info_available_memory();
+    
+    uint64_t mb = 1024*1024;
+    
+    cout<<"memory:"<<ar/mb<<"/"<<tr/mb<<" MB\n";
+    
     cout<<"product:"<<slb_info_product_name()<<"\n";
     cout<<"vendor:"<<slb_info_board_vendor()<<"\n";
+    cout<<"bios:"<<slb_info_bios_version()<<"\n";
+    cout<<"EC:"<<slb_info_ec_firmware_release()<<"\n";
     cout<<"serial:"<<slb_info_product_serial()<<"\n";
     cout<<"model:0x"<<std::hex<<slb_info_get_model()<<"\n";
-    cout<<"platform:0x"<<slb_info_get_platform()<<"\n";
-    cout<<"module loaded:"<<slb_info_is_module_loaded();
-    cout<<endl;
+    
+    uint32_t platform = slb_info_get_platform();
+    cout<<"platform:0x"<<platform<<"\n";
+    
+    bool module_loaded = slb_info_is_module_loaded();
+    cout<<"module loaded:"<<yesno[module_loaded]<<"\n";
+    
+    if (module_loaded and platform == SLB_PLATFORM_QC71) {
+        uint32_t value = 0;
+        
+        slb_qc71_fn_lock_get(&value);
+        cout<<"fn lock:"<<yesno[value]<<"\n";
+        
+        slb_qc71_super_lock_get(&value);
+        cout<<"super key lock:"<<yesno[value]<<"\n";
+        
+        slb_qc71_silent_mode_get(&value);
+        cout<<"silent mode:"<<yesno[value]<<"\n";
+    }
+        
+    cout<<std::flush;
 }
 
 int main(int argc,char* argv[])

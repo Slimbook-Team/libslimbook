@@ -21,6 +21,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "slimbook.h"
 #include "configuration.h"
 
+#include <sys/sysinfo.h>
+
 #include <string>
 #include <cstring>
 #include <fstream>
@@ -38,6 +40,8 @@ using namespace std;
 
 #define MODULE_QC71 "qc71_laptop"
 #define MODULE_CLEVO "clevo_platform"
+
+#define SLB_SUCCESS 0
 
 thread_local std::string buffer;
 
@@ -244,6 +248,59 @@ uint32_t slb_info_is_module_loaded()
     return 0;
 }
 
+int64_t slb_info_uptime()
+{
+    struct sysinfo info;
+    
+    sysinfo(&info);
+    
+    return info.uptime;
+}
+
+const char* slb_info_kernel()
+{
+    try {
+        buffer.clear();
+        read_device("/proc/version",buffer);
+        return buffer.c_str();
+    }
+    catch (...) {
+        return nullptr;
+    }
+}
+
+const char* slb_info_cmdline()
+{
+    try {
+        buffer.clear();
+        read_device("/proc/cmdline",buffer);
+        return buffer.c_str();
+    }
+    catch (...) {
+        return nullptr;
+    }
+}
+
+uint64_t slb_info_total_memory()
+{
+    struct sysinfo info;
+    
+    sysinfo(&info);
+    
+    return info.totalram;
+
+}
+
+uint64_t slb_info_available_memory()
+{
+    struct sysinfo info;
+    
+    sysinfo(&info);
+    
+    return info.freeram;
+
+}
+
 int slb_kbd_backlight_get(uint32_t model, uint32_t* color)
 {
     if (color == nullptr) {
@@ -403,5 +460,101 @@ int slb_config_store(uint32_t model)
     }
     
     return 0;
+}
+
+int slb_qc71_fn_lock_get(uint32_t* value)
+{
+    if (value == nullptr) {
+        return EINVAL;
+    }
+    
+    try {
+        string svalue;
+        read_device(SYSFS_QC71"fn_lock",svalue);
+        *value = std::stoi(svalue,0,10);
+    }
+    catch (...) {
+        return EIO;
+    }
+    
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_fn_lock_set(uint32_t value)
+{
+    try {
+        stringstream ss;
+        ss<<value;
+        write_device(SYSFS_QC71"fn_lock",ss.str());
+    }
+    catch (...) {
+        return EIO;
+    }
+    
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_super_lock_get(uint32_t* value)
+{
+    if (value == nullptr) {
+        return EINVAL;
+    }
+    
+    try {
+        string svalue;
+        read_device(SYSFS_QC71"super_key_lock",svalue);
+        *value = std::stoi(svalue,0,10);
+    }
+    catch (...) {
+        return EIO;
+    }
+    
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_super_lock_set(uint32_t value)
+{
+    try {
+        stringstream ss;
+        ss<<value;
+        write_device(SYSFS_QC71"super_key_lock",ss.str());
+    }
+    catch (...) {
+        return EIO;
+    }
+
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_silent_mode_get(uint32_t* value)
+{
+    if (value == nullptr) {
+        return EINVAL;
+    }
+    
+    try {
+        string svalue;
+        read_device(SYSFS_QC71"silent_mode",svalue);
+        *value = std::stoi(svalue,0,10);
+    }
+    catch (...) {
+        return EIO;
+    }
+    
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_silent_mode_set(uint32_t value)
+{
+    try {
+        stringstream ss;
+        ss<<value;
+        write_device(SYSFS_QC71"silent_mode",ss.str());
+    }
+    catch (...) {
+        return EIO;
+    }
+
+    return SLB_SUCCESS;
 }
 
