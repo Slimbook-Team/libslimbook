@@ -34,7 +34,7 @@ void show_help()
     cout<<"\n"<<endl;
     cout<<"Commands:"<<endl;
     cout<<"info: display Slimbook model information"<<endl;
-    cout<<"ket-gbd-backlight: shows current keyboard backlight value in 32bit hexadecimal"<<endl;
+    cout<<"get-gbd-backlight: shows current keyboard backlight value in 32bit hexadecimal"<<endl;
     cout<<"set-kbd-backlight HEX: sets keyboard backlight as 32bit hexadecimal"<<endl;
     cout<<"config-load: loads module settings"<<endl;
     cout<<"config-store: stores module settings to disk"<<endl;

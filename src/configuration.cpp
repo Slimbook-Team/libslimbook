@@ -133,7 +133,7 @@ void Configuration::set_u32(string key, uint32_t value)
 {
     stringstream ss;
     
-    ss<<std::setfill('0')<<std::setw(8)<<value;
+    ss<<std::hex<<std::setfill('0')<<std::setw(8)<<value;
     m_data[key] = ss.str();
 }
 
