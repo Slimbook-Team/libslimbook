@@ -19,16 +19,29 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include "slimbook.h"
+#include "configuration.h"
+
+#include <sys/sysinfo.h>
 
 #include <string>
 #include <cstring>
 #include <fstream>
 #include <thread>
 #include <vector>
+#include <sstream>
+#include <iomanip>
+#include <iostream>
 
 using namespace std;
 
 #define SYSFS_DMI "/sys/devices/virtual/dmi/id/"
+#define SYSFS_QC71 "/sys/devices/platform/qc71_laptop/"
+#define SYSFS_CLEVO "/sys/devices/platform/clevo_platform/"
+
+#define MODULE_QC71 "qc71_laptop"
+#define MODULE_CLEVO "clevo_platform"
+
+#define SLB_SUCCESS 0
 
 thread_local std::string buffer;
 
@@ -41,9 +54,23 @@ struct database_entry_t
 };
 
 database_entry_t database [] = {
-
+    {"PROX-AMD", "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_PROX_AMD},
+    {"PROX15-AMD", "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_PROX_15_AMD},
     {"PROX-AMD5", "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_PROX_AMD5},
+    {"PROX15-AMD5", "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_PROX_15_AMD5},
+    {"Executive", "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_EXECUTIVE_12TH},
+    {"EXECUTIVE-14", "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_EXECUTIVE_14_11TH},
+    {"TITAN", "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_TITAN},
     {"HERO-RPL-RTX", "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_HERO_RPL_RTX},
+    {"HERO-S-TGL-RTX", "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_HERO_S_TGL_RTX},
+    {"SLIMBOOK", "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ESSENTIAL_SLIMBOOK},
+    {"ESSENTIAL", "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ESSENTIAL_ESSENTIAL},
+    {"Essential15L", "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ESSENTIAL_15L},
+    {"ESS-15-AMD-5", "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ESSENTIAL_15_AMD_5000},
+    {"ESSENTIAL-15-11", "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ESSENTIAL_15_11},
+    {"ESSENTIAL-15-11 ", "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ESSENTIAL_15_11},
+    {"Elemental15-I12", "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ELEMENTAL_15_I12},
+    {"Elemental14-I12", "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ELEMENTAL_14_I12},
     {0,0,0,0}
 };
 
@@ -53,6 +80,15 @@ static void read_device(string path,string& out)
 
     file.open(path.c_str());
     std::getline(file,out);
+    file.close();
+}
+
+static void write_device(string path,string in)
+{
+    ofstream file;
+
+    file.open(path.c_str());
+    file<<in;
     file.close();
 }
 
@@ -76,6 +112,21 @@ static vector<string> get_modules()
     file.close();
     
     return modules;
+}
+
+static uint32_t get_model_platform(uint32_t model)
+{
+    database_entry_t* entry = database;
+
+    while (entry->model > 0) {
+        if (model == entry->model) {
+            return entry->platform;
+        }
+
+        entry++;
+    }
+
+    return SLB_PLATFORM_UNKNOWN;
 }
 
 const char* slb_info_product_name()
@@ -107,6 +158,30 @@ const char* slb_info_product_serial()
     try {
         buffer.clear();
         read_device(SYSFS_DMI"product_serial",buffer);
+        return buffer.c_str();
+    }
+    catch (...) {
+        return nullptr;
+    }
+}
+
+const char* slb_info_bios_version()
+{
+    try {
+        buffer.clear();
+        read_device(SYSFS_DMI"bios_version",buffer);
+        return buffer.c_str();
+    }
+    catch (...) {
+        return nullptr;
+    }
+}
+
+const char* slb_info_ec_firmware_release()
+{
+    try {
+        buffer.clear();
+        read_device(SYSFS_DMI"ec_firmware_release",buffer);
         return buffer.c_str();
     }
     catch (...) {
@@ -161,14 +236,345 @@ uint32_t slb_info_is_module_loaded()
     vector<string> modules = get_modules();
     
     for (string mod : modules) {
-        if (platform == SLB_PLATFORM_QC71 and mod == "qc71_laptop") {
+        if (platform == SLB_PLATFORM_QC71 and mod == MODULE_QC71) {
             return 1;
         }
         
-        if (platform == SLB_PLATFORM_CLEVO and mod == "clevo_platform") {
+        if (platform == SLB_PLATFORM_CLEVO and mod == MODULE_CLEVO) {
             return 1;
         }
     }
     
     return 0;
 }
+
+int64_t slb_info_uptime()
+{
+    struct sysinfo info;
+    
+    sysinfo(&info);
+    
+    return info.uptime;
+}
+
+const char* slb_info_kernel()
+{
+    try {
+        buffer.clear();
+        read_device("/proc/version",buffer);
+        return buffer.c_str();
+    }
+    catch (...) {
+        return nullptr;
+    }
+}
+
+const char* slb_info_cmdline()
+{
+    try {
+        buffer.clear();
+        read_device("/proc/cmdline",buffer);
+        return buffer.c_str();
+    }
+    catch (...) {
+        return nullptr;
+    }
+}
+
+uint64_t slb_info_total_memory()
+{
+    struct sysinfo info;
+    
+    sysinfo(&info);
+    
+    return info.totalram;
+
+}
+
+uint64_t slb_info_available_memory()
+{
+    struct sysinfo info;
+    
+    sysinfo(&info);
+    
+    return info.freeram;
+
+}
+
+int slb_kbd_backlight_get(uint32_t model, uint32_t* color)
+{
+    if (color == nullptr) {
+        return EINVAL;
+    }
+    
+    if (model == 0) {
+        model = slb_info_get_model();
+    }
+    
+    if (model == 0) {
+        return ENOENT;
+    }
+    
+    if (model == SLB_MODEL_HERO_RPL_RTX) {
+        try {
+            string svalue;
+            uint32_t rgb;
+            uint32_t ival;
+            
+            read_device(SYSFS_QC71"kbd_backlight_rgb_red",svalue);
+            ival = std::stoi(svalue,0,16);
+            rgb = ival<<16;
+            
+            read_device(SYSFS_QC71"kbd_backlight_rgb_green",svalue);
+            ival = std::stoi(svalue,0,16);
+            rgb = rgb | (ival<<8);
+            
+            read_device(SYSFS_QC71"kbd_backlight_rgb_blue",svalue);
+            ival = std::stoi(svalue,0,16);
+            rgb = rgb | ival;
+            
+            *color = rgb;
+            
+            return 0;
+        }
+        catch(...) {
+            return EIO;
+        }
+    }
+    
+    if (model == SLB_MODEL_ELEMENTAL_15_I12 or model == SLB_MODEL_HERO_S_TGL_RTX) {
+        try {
+            string svalue;
+            uint32_t ival;
+            
+            read_device(SYSFS_CLEVO"color_left",svalue);
+            ival = std::stoi(svalue,0,16);
+            
+            *color = ival;
+            
+            return 0;
+        }
+        catch (...) {
+            return EIO;
+        }
+            
+    }
+    
+    return ENOENT;
+}
+
+int slb_kbd_backlight_set(uint32_t model, uint32_t color)
+{
+   if (model == 0) {
+        model = slb_info_get_model();
+    }
+    
+    if (model == 0) {
+        return ENOENT;
+    }
+    
+    if (model == SLB_MODEL_HERO_RPL_RTX) {
+        stringstream ss;
+        try {
+            uint32_t red = (color & 0x00ff0000) >> 16;
+            ss<<std::hex<<"0x"<<std::setfill('0')<<std::setw(2)<<red;
+            write_device(SYSFS_QC71"kbd_backlight_rgb_red",ss.str());
+            
+            ss.str("");
+            uint32_t green = (color & 0x0000ff00) >> 8;
+            ss<<"0x"<<std::setfill('0')<<std::setw(2)<<green;
+            write_device(SYSFS_QC71"kbd_backlight_rgb_green",ss.str());
+            
+            uint32_t blue = (color & 0x000000ff);
+            ss.str("");
+            ss<<"0x"<<std::setfill('0')<<std::setw(2)<<blue;
+            write_device(SYSFS_QC71"kbd_backlight_rgb_blue",ss.str());
+            
+            return 0;
+        }
+        catch(...) {
+            return EIO;
+        }
+    }
+    
+    if (model == SLB_MODEL_ELEMENTAL_15_I12 or model == SLB_MODEL_HERO_S_TGL_RTX) {
+        try {
+            stringstream ss;
+            ss<<std::hex<<"0x"<<std::setfill('0')<<std::setw(6)<<color;
+            write_device(SYSFS_CLEVO"color_left",ss.str());
+        }
+        catch (...) {
+            return EIO;
+        }
+    }
+    
+    return ENOENT;
+}
+
+int slb_config_load(uint32_t model)
+{
+    if (model == 0) {
+        model = slb_info_get_model();
+    }
+    
+    if (model == 0) {
+        return ENOENT;
+    }
+    
+    // uint32_t platform = get_model_platform(model);
+    bool module_loaded = slb_info_is_module_loaded();
+
+    Configuration conf;
+    try {
+        conf.load();
+    }
+    catch(...) {
+        return EIO;
+    }
+    
+    if (module_loaded and model == SLB_MODEL_HERO_RPL_RTX) {
+        uint32_t backlight;
+
+        if (conf.find_u32("qc71.hero.backlight",backlight)) {
+            slb_kbd_backlight_set(model,backlight);
+        }
+    }
+
+    return 0;
+}
+
+int slb_config_store(uint32_t model)
+{
+    if (model == 0) {
+        model = slb_info_get_model();
+    }
+    
+    if (model == 0) {
+        return ENOENT;
+    }
+
+    uint32_t platform = get_model_platform(model);
+    bool module_loaded = slb_info_is_module_loaded();
+    
+    Configuration conf;
+
+    try {
+        conf.load();
+
+        conf.set_u32("version",1);
+        conf.set_u32("model",model);
+        conf.set_u32("platform",platform);
+
+        if (module_loaded and model == SLB_MODEL_HERO_RPL_RTX) {
+            uint32_t backlight = 0;
+
+            slb_kbd_backlight_get(model,&backlight);
+            conf.set_u32("qc71.hero.backlight",backlight);
+        }
+
+        conf.store();
+    }
+    catch(...) {
+        cerr<<"Something went wrong"<<endl;
+        return EIO;
+    }
+    
+    return 0;
+}
+
+int slb_qc71_fn_lock_get(uint32_t* value)
+{
+    if (value == nullptr) {
+        return EINVAL;
+    }
+    
+    try {
+        string svalue;
+        read_device(SYSFS_QC71"fn_lock",svalue);
+        *value = std::stoi(svalue,0,10);
+    }
+    catch (...) {
+        return EIO;
+    }
+    
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_fn_lock_set(uint32_t value)
+{
+    try {
+        stringstream ss;
+        ss<<value;
+        write_device(SYSFS_QC71"fn_lock",ss.str());
+    }
+    catch (...) {
+        return EIO;
+    }
+    
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_super_lock_get(uint32_t* value)
+{
+    if (value == nullptr) {
+        return EINVAL;
+    }
+    
+    try {
+        string svalue;
+        read_device(SYSFS_QC71"super_key_lock",svalue);
+        *value = std::stoi(svalue,0,10);
+    }
+    catch (...) {
+        return EIO;
+    }
+    
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_super_lock_set(uint32_t value)
+{
+    try {
+        stringstream ss;
+        ss<<value;
+        write_device(SYSFS_QC71"super_key_lock",ss.str());
+    }
+    catch (...) {
+        return EIO;
+    }
+
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_silent_mode_get(uint32_t* value)
+{
+    if (value == nullptr) {
+        return EINVAL;
+    }
+    
+    try {
+        string svalue;
+        read_device(SYSFS_QC71"silent_mode",svalue);
+        *value = std::stoi(svalue,0,10);
+    }
+    catch (...) {
+        return EIO;
+    }
+    
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_silent_mode_set(uint32_t value)
+{
+    try {
+        stringstream ss;
+        ss<<value;
+        write_device(SYSFS_QC71"silent_mode",ss.str());
+    }
+    catch (...) {
+        return EIO;
+    }
+
+    return SLB_SUCCESS;
+}
+

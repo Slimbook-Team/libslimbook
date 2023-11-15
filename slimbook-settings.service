@@ -1,0 +1,8 @@
+[Unit]
+Description = Slimbook settings load and store service
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart=/usr/bin/slimbookctl config-load
+ExecStop=/usr/bin/slimbookctl config-store
