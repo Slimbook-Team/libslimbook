@@ -1,3 +1,10 @@
+libslimbook (1.5.2) jammy; urgency=medium
+
+  * Fixed find_u32 method crashing
+  * Updated help cli command
+
+ -- Slimbook <dev@slimbook.es>  Wed, 15 Nov 2023 13:30:27 +0100
+
 libslimbook (1.5.1) jammy; urgency=medium
 
   * Clevo backlight support (untested)
