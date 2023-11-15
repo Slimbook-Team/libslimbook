@@ -116,7 +116,7 @@ bool Configuration::find_u32(std::string key, uint32_t& out)
     it = m_data.find(key);
 
     if (it != m_data.end()) {
-        out = std::stoi(it->first,0,16);
+        out = std::stoi(it->second,0,16);
         return true;
     }
     else {
