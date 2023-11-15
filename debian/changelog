@@ -1,3 +1,54 @@
+libslimbook (1.5) jammy; urgency=medium
+
+  * Added support for qc71 features
+  * Added some kernel info functions
+  * Cli info command shows more information
+
+ -- Slimbook <dev@slimbook.es>  Mon, 13 Nov 2023 15:57:17 +0100
+
+libslimbook (1.4) jammy; urgency=medium
+
+  * Added a settings service
+
+ -- Slimbook <dev@slimbook.es>  Sun, 12 Nov 2023 12:07:10 +0100
+
+libslimbook (1.3) jammy; urgency=medium
+
+  * Model database now detects Essential and Elemental families
+
+ -- Slimbook <dev@slimbook.es>  Thu, 09 Nov 2023 15:49:13 +0100
+
+libslimbook (1.2.3) jammy; urgency=medium
+
+  * Fixed bad Hero backlight setting
+
+ -- Slimbook <dev@slimbook.es>  Sat, 04 Nov 2023 16:59:28 +0100
+
+libslimbook (1.2.2) jammy; urgency=medium
+
+  * Added missing QC71 devices to database.
+
+ -- Slimbook <dev@slimbook.es>  Sat, 04 Nov 2023 09:12:15 +0100
+
+libslimbook (1.2.1) jammy; urgency=medium
+
+  * Fixed debian package striping setuid flag
+
+ -- Slimbook <dev@slimbook.es>  Fri, 03 Nov 2023 18:08:21 +0100
+
+libslimbook (1.2) jammy; urgency=medium
+
+  * Added Hero keyboard backlight get/set support
+
+ -- Slimbook <dev@slimbook.es>  Sun, 29 Oct 2023 22:50:48 +0100
+
+libslimbook (1.1) jammy; urgency=medium
+
+  * Added bios and ec version getters
+  * Fixed model mask constants
+
+ -- Slimbook <dev@slimbook.es>  Wed, 25 Oct 2023 12:06:18 +0200
+
 libslimbook (1.0) jammy; urgency=medium
 
   * Initial release.
