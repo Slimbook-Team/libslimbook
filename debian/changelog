@@ -1,3 +1,9 @@
+libslimbook (1.5.3) jammy; urgency=medium
+
+  * Fixed storing integers
+
+ -- Slimbook <dev@slimbook.es>  Wed, 15 Nov 2023 14:32:44 +0100
+
 libslimbook (1.5.2) jammy; urgency=medium
 
   * Fixed find_u32 method crashing
