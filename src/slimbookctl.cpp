@@ -20,12 +20,72 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "slimbook.h"
 
+#include <sys/statvfs.h>
+#include <mntent.h>
+
 #include <iostream>
 #include <iomanip>
 #include <string>
 #include <map>
+#include <vector>
+#include <fstream>
+#include <sstream>
 
 using namespace std;
+
+static string trim(string in)
+{
+    string out;
+    size_t first = 0;
+    size_t last = 0;
+    bool ffound = false;
+    
+    for (size_t n=0;n<in.size();n++) {
+        char c = in[n];
+        
+        if (!ffound and c!=' ') {
+            ffound = true;
+            first = n;
+        }
+        
+        if (c!=' ') {
+            last = n;
+        }
+    }
+    out = in.substr(first,last+1);
+    
+    return out;
+}
+
+static string to_human(uint64_t value)
+{
+    string magnitude = "";
+    double tmp = value;
+    
+    if (tmp > 1024) {
+        tmp = tmp / 1024;
+        magnitude = "K";
+    }
+    
+    if (tmp > 1024) {
+        tmp = tmp / 1024;
+        magnitude = "M";
+    }
+    
+    if (tmp > 1024) {
+        tmp = tmp / 1024;
+        magnitude = "G";
+    }
+    
+    stringstream ss;
+    
+    ss.precision(2);
+    
+    ss<<std::fixed<<tmp<<" "<<magnitude;
+    
+    return ss.str();
+    
+}
 
 void show_help()
 {
@@ -45,28 +105,85 @@ void show_info()
 {
     map<int,string> yesno = {{0,"no"},{1,"yes"}};
     
-    cout<<"kernel:"<<slb_info_kernel()<<"\n";
-    
     int64_t uptime = slb_info_uptime();
     int64_t h = uptime / 3600;
     int64_t m = (uptime / 60) % 60;
     int64_t s = uptime % 60;
     
     cout<<"uptime:"<<h<<"h "<<m<<"m "<<s<<"s\n";
+    cout<<"kernel:"<<slb_info_kernel()<<"\n";
+    
     uint64_t tr,ar;
     
     tr = slb_info_total_memory();
     ar = slb_info_available_memory();
     
-    uint64_t mb = 1024*1024;
+    cout<<"memory free/total:"<<to_human(ar)<<"/"<<to_human(tr)<<"\n";
     
-    cout<<"memory:"<<ar/mb<<"/"<<tr/mb<<" MB\n";
+    std::vector<string> mounts = {"/", "/home", "/boot/efi", "/boot"};
     
+    FILE* mfile = setmntent("/proc/self/mounts","r");
+    struct mntent* ent = getmntent(mfile);
+    
+    while(ent!=nullptr) {
+        string dev = ent->mnt_fsname;
+        string dir = ent->mnt_dir;
+        
+        for (string& m : mounts) {
+            
+            if (dir == m) {
+                struct statvfs stat;
+        
+                if (statvfs(dir.c_str(),&stat) == 0) {
+                    uint64_t fbytes = stat.f_bsize * stat.f_bfree;
+                    uint64_t tbytes = stat.f_bsize * stat.f_blocks;
+                    
+                    cout<<"disk free/total:"<<dir<<" "<<to_human(fbytes)<<"/"<<to_human(tbytes)<<endl;
+                }
+                
+                break;
+            }
+        
+        }
+        //cout<<ent->mnt_fsname<<":"<<ent->mnt_dir<<endl;
+        ent = getmntent(mfile);
+    }
+    /*
+        struct statvfs stat;
+        
+        if (statvfs(mp.c_str(),&stat) == 0) {
+            cout<<"mount:"<<mp<<endl;
+        }
+    */
     cout<<"product:"<<slb_info_product_name()<<"\n";
     cout<<"vendor:"<<slb_info_board_vendor()<<"\n";
     cout<<"bios:"<<slb_info_bios_version()<<"\n";
     cout<<"EC:"<<slb_info_ec_firmware_release()<<"\n";
     cout<<"serial:"<<slb_info_product_serial()<<"\n";
+    
+    // boot mode
+    
+    slb_smbios_entry_t* entries = nullptr;
+    int count = 0;
+
+    int status = slb_smbios_get(&entries,&count);
+    if (status == 0) {
+        for (int n=0;n<count;n++) {
+            if (entries[n].type == 4) {
+                string name = trim(entries[n].data.processor.version);
+                cout<<"cpu:"<<name<<" x "<<(int)entries[n].data.processor.cores<<endl;
+            }
+            
+            if (entries[n].type == 17) {
+                if (entries[n].data.memory_device.type > 2) {
+                    cout<<"memory device:"<<entries[n].data.memory_device.size<<" M "<<entries[n].data.memory_device.speed<<" MT/s"<<endl;
+                }
+            }
+        }
+        
+        slb_smbios_free(entries);
+    }
+    
     cout<<"model:0x"<<std::hex<<slb_info_get_model()<<"\n";
     
     uint32_t platform = slb_info_get_platform();
@@ -154,6 +271,10 @@ int main(int argc,char* argv[])
         clog<<"storing slimbook configuration:";
         int status = slb_config_store(0);
         clog<<status<<endl;
+    }
+
+    if (command == "serial") {
+        cout<<slb_info_product_serial()<<"\n";
     }
 
     return 0;
