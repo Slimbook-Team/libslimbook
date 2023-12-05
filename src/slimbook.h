@@ -54,6 +54,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_PLATFORM_QC71               0x0100
 #define SLB_PLATFORM_CLEVO              0x0200
 
+#define SLB_MAX_PROCESSOR_VERSION  48
+
 typedef struct {
     /* device size in bytes */
     uint64_t size;
@@ -67,7 +69,7 @@ typedef struct {
 
 typedef struct {
     uint8_t cores;
-    char version[48];
+    char version[SLB_MAX_PROCESSOR_VERSION];
 } slb_smbios_processor_t;
 
 typedef struct {

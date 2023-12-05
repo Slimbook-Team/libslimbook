@@ -80,7 +80,7 @@ int slb_smbios_get(slb_smbios_entry_t** entries,int* count)
             if (entry.type == 4) {
                 entry.data.processor.cores = raw[0x23];
                 string name = strings[raw[0x10]-1];
-                strncpy(entry.data.processor.version,name.c_str(),48);
+                strncpy(entry.data.processor.version,name.c_str(),SLB_MAX_PROCESSOR_VERSION - 1);
             }
 
             if (entry.type == 17) {
