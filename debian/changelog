@@ -1,3 +1,11 @@
+libslimbook (1.6.5) jammy; urgency=medium
+
+  * Some output improvements
+  * Added boot mode info
+  * storing/loading rgb settings on system sleep events
+
+ -- Slimbook <dev@slimbook.es>  Wed, 13 Dec 2023 13:20:08 +0100
+
 libslimbook (1.6.0) jammy; urgency=medium
 
   * Append extra info to command line output: memory, uptime, cpu, disk space, etc.
