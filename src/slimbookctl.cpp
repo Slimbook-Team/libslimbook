@@ -30,6 +30,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <filesystem>
 
 using namespace std;
 
@@ -64,17 +65,17 @@ static string to_human(uint64_t value)
     
     if (tmp > 1024) {
         tmp = tmp / 1024;
-        magnitude = "K";
+        magnitude = "KB";
     }
     
     if (tmp > 1024) {
         tmp = tmp / 1024;
-        magnitude = "M";
+        magnitude = "MB";
     }
     
     if (tmp > 1024) {
         tmp = tmp / 1024;
-        magnitude = "G";
+        magnitude = "GB";
     }
     
     stringstream ss;
@@ -148,20 +149,22 @@ void show_info()
         //cout<<ent->mnt_fsname<<":"<<ent->mnt_dir<<endl;
         ent = getmntent(mfile);
     }
-    /*
-        struct statvfs stat;
-        
-        if (statvfs(mp.c_str(),&stat) == 0) {
-            cout<<"mount:"<<mp<<endl;
-        }
-    */
+    
+    // boot mode
+    if (std::filesystem::exists("/sys/firmware/efi")) {
+        cout<<"boot mode: UEFI\n";
+    }
+    else {
+        cout<<"boot mode: legacy\n";
+    }
+
+    cout<<"\n";
+    
     cout<<"product:"<<slb_info_product_name()<<"\n";
     cout<<"vendor:"<<slb_info_board_vendor()<<"\n";
     cout<<"bios:"<<slb_info_bios_version()<<"\n";
     cout<<"EC:"<<slb_info_ec_firmware_release()<<"\n";
     cout<<"serial:"<<slb_info_product_serial()<<"\n";
-    
-    // boot mode
     
     slb_smbios_entry_t* entries = nullptr;
     int count = 0;
@@ -171,18 +174,24 @@ void show_info()
         for (int n=0;n<count;n++) {
             if (entries[n].type == 4) {
                 string name = trim(entries[n].data.processor.version);
-                cout<<"cpu:"<<name<<" x "<<(int)entries[n].data.processor.cores<<endl;
+                
+                // this may need another dmi var for a thread count bigger than 256
+                int count = entries[n].data.processor.threads;
+                
+                cout<<"cpu:"<<name<<" x "<<count<<endl;
             }
             
             if (entries[n].type == 17) {
                 if (entries[n].data.memory_device.type > 2) {
-                    cout<<"memory device:"<<entries[n].data.memory_device.size<<" M "<<entries[n].data.memory_device.speed<<" MT/s"<<endl;
+                    cout<<"memory device:"<<entries[n].data.memory_device.size<<" MB "<<entries[n].data.memory_device.speed<<" MT/s"<<endl;
                 }
             }
         }
         
         slb_smbios_free(entries);
     }
+    
+    cout<<"\n";
     
     cout<<"model:0x"<<std::hex<<slb_info_get_model()<<"\n";
     

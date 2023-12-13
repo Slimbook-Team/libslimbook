@@ -69,6 +69,7 @@ typedef struct {
 
 typedef struct {
     uint8_t cores;
+    uint8_t threads;
     char version[SLB_MAX_PROCESSOR_VERSION];
 } slb_smbios_processor_t;
 

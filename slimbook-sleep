@@ -1,0 +1,12 @@
+#!/bin/sh
+
+case "$1" in
+    pre)
+        /usr/bin/slimbookctl config-store
+    ;;
+    post)
+        /usr/bin/slimbookctl config-load
+    ;;
+esac
+
+exit 0
