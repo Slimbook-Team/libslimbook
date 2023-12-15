@@ -1,4 +1,5 @@
 /usr/lib/*/lib*.so.*
 /usr/bin
 /usr/lib/systemd/system/
+/usr/lib/systemd/system-sleep/
 /usr/lib/udev/rules.d/
