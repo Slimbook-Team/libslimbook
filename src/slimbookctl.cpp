@@ -56,7 +56,8 @@ static int run_command(vector<string>args)
     pid_t pid = fork();
     
     if (pid == 0) {
-        //clog<<"arg: "<<args[1].c_str()<<endl;
+        //switching to root UID
+        setuid(0);
         int status = execl(args[0].c_str(),args[1].c_str(),args[2].c_str(),(char *)0);
         if (status < 0) {
             exit(status);
@@ -330,7 +331,7 @@ int main(int argc,char* argv[])
     }
     
     if (command == "report") {
-    
+        
         string id = generate_id();
         string tmp_name = "/tmp/slimbook-report-" + id + "/";
         std::filesystem::create_directory(tmp_name);
