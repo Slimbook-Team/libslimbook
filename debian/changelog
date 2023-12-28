@@ -1,3 +1,9 @@
+libslimbook (1.7.1) jammy; urgency=medium
+
+  * Fixed scripts not being uid 0
+
+ -- Slimbook <dev@slimbook.es>  Thu, 28 Dec 2023 13:03:20 +0100
+
 libslimbook (1.7.0) jammy; urgency=medium
 
   * Added a report command (beta stage right now)
