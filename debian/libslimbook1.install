@@ -3,3 +3,4 @@
 /usr/lib/systemd/system/
 /usr/lib/systemd/system-sleep/
 /usr/lib/udev/rules.d/
+/usr/libexec/slimbook/*
