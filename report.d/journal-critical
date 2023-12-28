@@ -1,0 +1,3 @@
+#!/bin/sh
+
+journalctl --since "2 days ago" -p "emerg".."crit" > $1
