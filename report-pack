@@ -3,4 +3,4 @@
 DIR=`dirname $1`
 NAME=`basename $1`
 PKG="$DIR/$NAME.tar.gz"
-tar -C $DIR -zcvf $PKG $NAME &>/dev/null
+tar -C $DIR -zcvf $PKG $NAME >/dev/null
