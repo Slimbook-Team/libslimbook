@@ -1,3 +1,11 @@
+libslimbook (1.7.2) jammy; urgency=medium
+
+  * Added more report scripts
+  * Added info output as a report
+  * Report may be optional (ie: distro specific)
+
+ -- Slimbook <dev@slimbook.es>  Sun, 07 Jan 2024 16:40:23 +0100
+
 libslimbook (1.7.1) jammy; urgency=medium
 
   * Fixed scripts not being uid 0
