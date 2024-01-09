@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ -f /usr/bin/pamac ]
+then
+    pamac list -i > $1
+else
+    exit 200
+fi

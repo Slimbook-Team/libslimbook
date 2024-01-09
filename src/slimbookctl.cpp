@@ -139,15 +139,17 @@ void show_help()
     cout<<"\n"<<endl;
     cout<<"Commands:"<<endl;
     cout<<"info: display Slimbook model information"<<endl;
-    cout<<"get-gbd-backlight: shows current keyboard backlight value in 32bit hexadecimal"<<endl;
+    cout<<"get-kbd-backlight: shows current keyboard backlight value in 32bit hexadecimal"<<endl;
     cout<<"set-kbd-backlight HEX: sets keyboard backlight as 32bit hexadecimal"<<endl;
     cout<<"config-load: loads module settings"<<endl;
     cout<<"config-store: stores module settings to disk"<<endl;
     cout<<"help: show this help"<<endl;
 }
 
-void show_info()
+string get_info()
 {
+    stringstream sout;
+    
     map<int,string> yesno = {{0,"no"},{1,"yes"}};
     
     int64_t uptime = slb_info_uptime();
@@ -155,15 +157,15 @@ void show_info()
     int64_t m = (uptime / 60) % 60;
     int64_t s = uptime % 60;
     
-    cout<<"uptime:"<<h<<"h "<<m<<"m "<<s<<"s\n";
-    cout<<"kernel:"<<slb_info_kernel()<<"\n";
+    sout<<"uptime:"<<h<<"h "<<m<<"m "<<s<<"s\n";
+    sout<<"kernel:"<<slb_info_kernel()<<"\n";
     
     uint64_t tr,ar;
     
     tr = slb_info_total_memory();
     ar = slb_info_available_memory();
     
-    cout<<"memory free/total:"<<to_human(ar)<<"/"<<to_human(tr)<<"\n";
+    sout<<"memory free/total:"<<to_human(ar)<<"/"<<to_human(tr)<<"\n";
     
     std::vector<string> mounts = {"/", "/home", "/boot/efi", "/boot"};
     
@@ -183,7 +185,7 @@ void show_info()
                     uint64_t fbytes = stat.f_bsize * stat.f_bfree;
                     uint64_t tbytes = stat.f_bsize * stat.f_blocks;
                     
-                    cout<<"disk free/total:"<<dir<<" "<<to_human(fbytes)<<"/"<<to_human(tbytes)<<endl;
+                    sout<<"disk free/total:"<<dir<<" "<<to_human(fbytes)<<"/"<<to_human(tbytes)<<endl;
                 }
                 
                 break;
@@ -196,19 +198,19 @@ void show_info()
     
     // boot mode
     if (std::filesystem::exists("/sys/firmware/efi")) {
-        cout<<"boot mode: UEFI\n";
+        sout<<"boot mode: UEFI\n";
     }
     else {
-        cout<<"boot mode: legacy\n";
+        sout<<"boot mode: legacy\n";
     }
 
-    cout<<"\n";
+    sout<<"\n";
     
-    cout<<"product:"<<slb_info_product_name()<<"\n";
-    cout<<"vendor:"<<slb_info_board_vendor()<<"\n";
-    cout<<"bios:"<<slb_info_bios_version()<<"\n";
-    cout<<"EC:"<<slb_info_ec_firmware_release()<<"\n";
-    cout<<"serial:"<<slb_info_product_serial()<<"\n";
+    sout<<"product:"<<slb_info_product_name()<<"\n";
+    sout<<"vendor:"<<slb_info_board_vendor()<<"\n";
+    sout<<"bios:"<<slb_info_bios_version()<<"\n";
+    sout<<"EC:"<<slb_info_ec_firmware_release()<<"\n";
+    sout<<"serial:"<<slb_info_product_serial()<<"\n";
     
     slb_smbios_entry_t* entries = nullptr;
     int count = 0;
@@ -222,12 +224,12 @@ void show_info()
                 // this may need another dmi var for a thread count bigger than 256
                 int count = entries[n].data.processor.threads;
                 
-                cout<<"cpu:"<<name<<" x "<<count<<endl;
+                sout<<"cpu:"<<name<<" x "<<count<<endl;
             }
             
             if (entries[n].type == 17) {
                 if (entries[n].data.memory_device.type > 2) {
-                    cout<<"memory device:"<<entries[n].data.memory_device.size<<" MB "<<entries[n].data.memory_device.speed<<" MT/s"<<endl;
+                    sout<<"memory device:"<<entries[n].data.memory_device.size<<" MB "<<entries[n].data.memory_device.speed<<" MT/s"<<endl;
                 }
             }
         }
@@ -235,30 +237,37 @@ void show_info()
         slb_smbios_free(entries);
     }
     
-    cout<<"\n";
+    sout<<"\n";
     
-    cout<<"model:0x"<<std::hex<<slb_info_get_model()<<"\n";
+    sout<<"model:0x"<<std::hex<<slb_info_get_model()<<"\n";
     
     uint32_t platform = slb_info_get_platform();
-    cout<<"platform:0x"<<platform<<"\n";
+    sout<<"platform:0x"<<platform<<"\n";
     
     bool module_loaded = slb_info_is_module_loaded();
-    cout<<"module loaded:"<<yesno[module_loaded]<<"\n";
+    sout<<"module loaded:"<<yesno[module_loaded]<<"\n";
     
     if (module_loaded and platform == SLB_PLATFORM_QC71) {
         uint32_t value = 0;
         
         slb_qc71_fn_lock_get(&value);
-        cout<<"fn lock:"<<yesno[value]<<"\n";
+        sout<<"fn lock:"<<yesno[value]<<"\n";
         
         slb_qc71_super_lock_get(&value);
-        cout<<"super key lock:"<<yesno[value]<<"\n";
+        sout<<"super key lock:"<<yesno[value]<<"\n";
         
         slb_qc71_silent_mode_get(&value);
-        cout<<"silent mode:"<<yesno[value]<<"\n";
+        sout<<"silent mode:"<<yesno[value]<<"\n";
     }
-        
-    cout<<std::flush;
+    
+    sout<<std::flush;
+    return sout.str();
+}
+
+void show_info()
+{
+    string info = get_info();
+    cout<<info;
 }
 
 int main(int argc,char* argv[])
@@ -335,9 +344,20 @@ int main(int argc,char* argv[])
         string id = generate_id();
         string tmp_name = "/tmp/slimbook-report-" + id + "/";
         std::filesystem::create_directory(tmp_name);
+        
+        // store info
+        string info = get_info();
+        fstream finfo;
+        finfo.open(tmp_name+"info.txt",fstream::out);
+        
+        if (finfo.good()) {
+            finfo<<info;
+            finfo.close();
+        }
+        // else throw error?
     
         for (const auto& entry : std::filesystem::directory_iterator("/usr/libexec/slimbook/report.d/")) {
-            clog<<"running "<<entry.path().filename().string()<<" ";
+            clog<<" running "<<entry.path().filename().string()<<" ";
             string output = tmp_name + entry.path().filename().string() + ".txt";
             int status = run_command({entry.path(),entry.path().filename(),output});
             
@@ -345,7 +365,12 @@ int main(int argc,char* argv[])
                 clog<<"✓"<<endl;
             }
             else {
-                clog<<"✗"<<endl;
+                if (status == 200) {
+                    clog<<"⚑"<<endl;
+                }
+                else {
+                    clog<<"✗"<<endl;
+                }
             }
         }
         

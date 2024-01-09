@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ -f /usr/bin/libinput ] 
+then
+    libinput list-devices > $1 2>/dev/null
+else
+    exit 200
+fi
