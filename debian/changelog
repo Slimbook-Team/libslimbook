@@ -1,3 +1,10 @@
+libslimbook (1.7.3) UNRELEASED; urgency=medium
+
+  * Added usb, libinput and xinput reports
+  * Added some missing commits from main branch
+
+ -- Slimbook <dev@slimbook.es>  Tue, 09 Jan 2024 15:07:40 +0100
+
 libslimbook (1.7.2) jammy; urgency=medium
 
   * Added more report scripts
