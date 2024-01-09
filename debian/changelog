@@ -1,4 +1,4 @@
-libslimbook (1.7.3) UNRELEASED; urgency=medium
+libslimbook (1.7.3) jammy; urgency=medium
 
   * Added usb, libinput and xinput reports
   * Added some missing commits from main branch
