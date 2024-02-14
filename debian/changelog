@@ -1,3 +1,12 @@
+libslimbook (1.8.0) jammy; urgency=medium
+
+  * Added family helper function
+  * Added scancode constants
+  * Added some (still basic) input device path detection functions
+  * Added initial support for incoming models
+
+ -- Slimbook <dev@slimbook.es>  Wed, 14 Feb 2024 17:35:58 +0100
+
 libslimbook (1.7.3) jammy; urgency=medium
 
   * Added usb, libinput and xinput reports
