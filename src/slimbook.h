@@ -21,6 +21,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <stdint.h>
 #include <stddef.h>
 
+#define SLB_FAMILY_MASK                 0xffffff00
+
 #define SLB_MODEL_UNKNOWN               0x0000
 
 #define SLB_MODEL_EXECUTIVE             0x0100
@@ -50,11 +52,23 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_MODEL_ELEMENTAL_15_I12      0x2001
 #define SLB_MODEL_ELEMENTAL_14_I12      0x2002
 
+#define SLB_MODEL_EXCALIBUR             0x4000
+#define SLB_MODEL_EXCALIBUR_14_AMD7     0x4001
+#define SLB_MODEL_EXCALIBUR_16_AMD7     0x4002
+
 #define SLB_PLATFORM_UNKNOWN            0x0000
 #define SLB_PLATFORM_QC71               0x0100
 #define SLB_PLATFORM_CLEVO              0x0200
+#define SLB_PLATFORM_Z16                0x0400
 
 #define SLB_MAX_PROCESSOR_VERSION  48
+
+#define SLB_SCAN_QC71_SUPER_LOCK        0x68
+#define SLB_SCAN_QC71_SILENT_MODE       0x69
+#define SLB_SCAN_QC71_TOUCHPAD_SWITCH   0x76
+#define SLB_SCAN_Z16_SILENT_MODE        0xf2
+#define SLB_SCAN_Z16_NORMAL_MODE        0xf9
+#define SLB_SCAN_Z16_PERFORMANCE_MODE   0xe2
 
 typedef struct {
     /* device size in bytes */
@@ -102,6 +116,9 @@ extern "C" const char* slb_info_ec_firmware_release();
 /* Guess Slimbook model */
 extern "C" uint32_t slb_info_get_model();
 
+/* Get Slimbook model family */
+extern "C" uint32_t slb_info_get_family();
+
 /* Guess Slimbook platform */
 extern "C" uint32_t slb_info_get_platform();
 
@@ -140,6 +157,15 @@ extern "C" int slb_config_load(uint32_t model);
 
 /* Stores configuration from driver to disk */
 extern "C" int slb_config_store(uint32_t model);
+
+/* Gets keyboard device path, or null if does not apply */
+extern "C" const char* slb_keyboard_device();
+
+/* Gets module evdev device path, or null if does not apply */
+extern "C" const char* slb_module_device();
+
+/* Gets touchpad device path, or null if does not apply */
+extern "C" const char* slb_touchpad_device();
 
 /* Gets Fn lock status */
 extern "C" int slb_qc71_fn_lock_get(uint32_t* value);

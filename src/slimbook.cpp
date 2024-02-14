@@ -71,6 +71,8 @@ database_entry_t database [] = {
     {"ESSENTIAL-15-11 ", "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ESSENTIAL_15_11},
     {"Elemental15-I12", "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ELEMENTAL_15_I12},
     {"Elemental14-I12", "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ELEMENTAL_14_I12},
+    {"EXCALIBUR-14-AMD7", "SLIMBOOK", SLB_PLATFORM_Z16, SLB_MODEL_EXCALIBUR_14_AMD7},
+    {"EXCALIBUR-16-AMD7", "SLIMBOOK", SLB_PLATFORM_Z16, SLB_MODEL_EXCALIBUR_16_AMD7},
     {0,0,0,0}
 };
 
@@ -205,6 +207,11 @@ uint32_t slb_info_get_model()
     }
     
     return SLB_MODEL_UNKNOWN;
+}
+
+uint32_t slb_info_get_family()
+{
+    return slb_info_get_model() & SLB_FAMILY_MASK;
 }
 
 uint32_t slb_info_get_platform()
@@ -480,6 +487,53 @@ int slb_config_store(uint32_t model)
     }
     
     return 0;
+}
+
+const char* slb_keyboard_device()
+{
+    uint32_t platform = slb_info_get_platform();
+    
+    switch (platform) {
+        case SLB_PLATFORM_QC71:
+        case SLB_PLATFORM_Z16:
+            buffer = "/dev/input/by-path/platform-i8042-serio-0-event-kbd";
+            return buffer.c_str();
+        break;
+        
+        default:
+            return nullptr;
+    }
+}
+
+const char* slb_module_device()
+{
+    uint32_t platform = slb_info_get_platform();
+    
+    switch (platform) {
+        case SLB_PLATFORM_QC71:
+            buffer = "/dev/input/by-path/platform-qc71_laptop-event";
+            return buffer.c_str();
+        break;
+        
+        default:
+            return nullptr;
+    }
+}
+
+const char* slb_touchpad_device()
+{
+    
+    uint32_t platform = slb_info_get_platform();
+    
+    switch (platform) {
+        case SLB_PLATFORM_QC71:
+            buffer = "/dev/input/by-path/platform-AMDI0010:01-event-mouse";
+            return buffer.c_str();
+        break;
+        
+        default:
+            return nullptr;
+    }
 }
 
 int slb_qc71_fn_lock_get(uint32_t* value)
