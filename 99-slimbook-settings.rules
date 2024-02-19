@@ -1,2 +1,4 @@
 ACTION=="add", SUBSYSTEM=="module", DEVPATH=="/module/qc71_laptop", TAG+="systemd", ENV{SYSTEMD_WANTS}="slimbook-settings.service"
 
+ACTION=="add", SUBSYSTEM=="module", DEVPATH=="/module/clevo_platform", TAG+="systemd", ENV{SYSTEMD_WANTS}="slimbook-settings.service"
+

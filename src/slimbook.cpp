@@ -308,6 +308,53 @@ uint64_t slb_info_available_memory()
 
 }
 
+const char* slb_info_keyboard_device()
+{
+    uint32_t platform = slb_info_get_platform();
+    
+    switch (platform) {
+        case SLB_PLATFORM_QC71:
+        case SLB_PLATFORM_Z16:
+            buffer = "/dev/input/by-path/platform-i8042-serio-0-event-kbd";
+            return buffer.c_str();
+        break;
+        
+        default:
+            return nullptr;
+    }
+}
+
+const char* slb_info_module_device()
+{
+    uint32_t platform = slb_info_get_platform();
+    
+    switch (platform) {
+        case SLB_PLATFORM_QC71:
+            buffer = "/dev/input/by-path/platform-qc71_laptop-event";
+            return buffer.c_str();
+        break;
+        
+        default:
+            return nullptr;
+    }
+}
+
+const char* slb_info_touchpad_device()
+{
+    
+    uint32_t platform = slb_info_get_platform();
+    
+    switch (platform) {
+        case SLB_PLATFORM_QC71:
+            buffer = "/dev/input/by-path/platform-AMDI0010:01-event-mouse";
+            return buffer.c_str();
+        break;
+        
+        default:
+            return nullptr;
+    }
+}
+
 int slb_kbd_backlight_get(uint32_t model, uint32_t* color)
 {
     if (color == nullptr) {
@@ -409,6 +456,8 @@ int slb_kbd_backlight_set(uint32_t model, uint32_t color)
             stringstream ss;
             ss<<std::hex<<"0x"<<std::setfill('0')<<std::setw(6)<<color;
             write_device(SYSFS_CLEVO"color_left",ss.str());
+            
+            return 0;
         }
         catch (...) {
             return EIO;
@@ -446,6 +495,14 @@ int slb_config_load(uint32_t model)
             slb_kbd_backlight_set(model,backlight);
         }
     }
+    
+    if (module_loaded and (model == SLB_MODEL_ELEMENTAL_15_I12 or model == SLB_MODEL_HERO_S_TGL_RTX)) {
+        uint32_t backlight;
+
+        if (conf.find_u32("clevo.backlight",backlight)) {
+            slb_kbd_backlight_set(model,backlight);
+        }
+    }
 
     return 0;
 }
@@ -478,6 +535,14 @@ int slb_config_store(uint32_t model)
             slb_kbd_backlight_get(model,&backlight);
             conf.set_u32("qc71.hero.backlight",backlight);
         }
+        
+        if (module_loaded and (model == SLB_MODEL_ELEMENTAL_15_I12 or model == SLB_MODEL_HERO_S_TGL_RTX)) {
+        
+            uint32_t backlight = 0;
+
+            slb_kbd_backlight_get(model,&backlight);
+            conf.set_u32("clevo.backlight",backlight);
+        }
 
         conf.store();
     }
@@ -487,53 +552,6 @@ int slb_config_store(uint32_t model)
     }
     
     return 0;
-}
-
-const char* slb_keyboard_device()
-{
-    uint32_t platform = slb_info_get_platform();
-    
-    switch (platform) {
-        case SLB_PLATFORM_QC71:
-        case SLB_PLATFORM_Z16:
-            buffer = "/dev/input/by-path/platform-i8042-serio-0-event-kbd";
-            return buffer.c_str();
-        break;
-        
-        default:
-            return nullptr;
-    }
-}
-
-const char* slb_module_device()
-{
-    uint32_t platform = slb_info_get_platform();
-    
-    switch (platform) {
-        case SLB_PLATFORM_QC71:
-            buffer = "/dev/input/by-path/platform-qc71_laptop-event";
-            return buffer.c_str();
-        break;
-        
-        default:
-            return nullptr;
-    }
-}
-
-const char* slb_touchpad_device()
-{
-    
-    uint32_t platform = slb_info_get_platform();
-    
-    switch (platform) {
-        case SLB_PLATFORM_QC71:
-            buffer = "/dev/input/by-path/platform-AMDI0010:01-event-mouse";
-            return buffer.c_str();
-        break;
-        
-        default:
-            return nullptr;
-    }
 }
 
 int slb_qc71_fn_lock_get(uint32_t* value)

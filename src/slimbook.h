@@ -140,6 +140,15 @@ extern "C" uint64_t slb_info_total_memory();
 /* Gets available system memory (not used by any process or buffer) */
 extern "C" uint64_t slb_info_available_memory();
 
+/* Gets keyboard device path, or null if does not apply */
+extern "C" const char* slb_info_keyboard_device();
+
+/* Gets module evdev device path, or null if does not apply */
+extern "C" const char* slb_info_module_device();
+
+/* Gets touchpad device path, or null if does not apply */
+extern "C" const char* slb_info_touchpad_device();
+
 /* Query DMI tables  */
 extern "C" int slb_smbios_get(slb_smbios_entry_t** entries,int* count);
 
@@ -157,15 +166,6 @@ extern "C" int slb_config_load(uint32_t model);
 
 /* Stores configuration from driver to disk */
 extern "C" int slb_config_store(uint32_t model);
-
-/* Gets keyboard device path, or null if does not apply */
-extern "C" const char* slb_keyboard_device();
-
-/* Gets module evdev device path, or null if does not apply */
-extern "C" const char* slb_module_device();
-
-/* Gets touchpad device path, or null if does not apply */
-extern "C" const char* slb_touchpad_device();
 
 /* Gets Fn lock status */
 extern "C" int slb_qc71_fn_lock_get(uint32_t* value);
