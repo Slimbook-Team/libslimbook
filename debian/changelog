@@ -1,3 +1,9 @@
+libslimbook (1.9.0) jammy; urgency=medium
+
+  * Added backlight support for Hero-S, Elemental and Essential
+
+ -- Slimbook <dev@slimbook.es>  Mon, 19 Feb 2024 16:01:22 +0100
+
 libslimbook (1.8.0) jammy; urgency=medium
 
   * Added family helper function
