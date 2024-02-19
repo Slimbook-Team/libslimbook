@@ -1,3 +1,9 @@
+libslimbook (1.9.1) jammy; urgency=medium
+
+  * Hero backlight is internally mapped into 0-c8 range
+
+ -- Slimbook <dev@slimbook.es>  Mon, 19 Feb 2024 17:24:43 +0100
+
 libslimbook (1.9.0) jammy; urgency=medium
 
   * Added backlight support for Hero-S, Elemental and Essential
