@@ -377,14 +377,20 @@ int slb_kbd_backlight_get(uint32_t model, uint32_t* color)
             
             read_device(SYSFS_QC71"kbd_backlight_rgb_red",svalue);
             ival = std::stoi(svalue,0,16);
+            float mp = ival/200.0f; //0xC8
+            ival = mp * 255.0f;
             rgb = ival<<16;
             
             read_device(SYSFS_QC71"kbd_backlight_rgb_green",svalue);
             ival = std::stoi(svalue,0,16);
+            mp = ival/200.0f; //0xC8
+            ival = mp * 255.0f;
             rgb = rgb | (ival<<8);
             
             read_device(SYSFS_QC71"kbd_backlight_rgb_blue",svalue);
             ival = std::stoi(svalue,0,16);
+            mp = ival/200.0f; //0xC8
+            ival = mp * 255.0f;
             rgb = rgb | ival;
             
             *color = rgb;
@@ -431,15 +437,22 @@ int slb_kbd_backlight_set(uint32_t model, uint32_t color)
         stringstream ss;
         try {
             uint32_t red = (color & 0x00ff0000) >> 16;
+            float mp = red/255.0f;
+            red = mp * 0xC8;
             ss<<std::hex<<"0x"<<std::setfill('0')<<std::setw(2)<<red;
             write_device(SYSFS_QC71"kbd_backlight_rgb_red",ss.str());
             
-            ss.str("");
+            
             uint32_t green = (color & 0x0000ff00) >> 8;
+            mp = green/255.0f;
+            green = mp * 0xC8;
+            ss.str("");
             ss<<"0x"<<std::setfill('0')<<std::setw(2)<<green;
             write_device(SYSFS_QC71"kbd_backlight_rgb_green",ss.str());
             
             uint32_t blue = (color & 0x000000ff);
+            mp = blue/255.0f;
+            blue = mp * 0xC8;
             ss.str("");
             ss<<"0x"<<std::setfill('0')<<std::setw(2)<<blue;
             write_device(SYSFS_QC71"kbd_backlight_rgb_blue",ss.str());
