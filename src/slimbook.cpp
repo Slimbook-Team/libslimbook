@@ -663,3 +663,36 @@ int slb_qc71_silent_mode_set(uint32_t value)
     return SLB_SUCCESS;
 }
 
+int slb_qc71_turbo_mode_get(uint32_t* value)
+{
+    if (value == nullptr) {
+        return EINVAL;
+    }
+    
+    try {
+        string svalue;
+        read_device(SYSFS_QC71"turbo_mode",svalue);
+        *value = std::stoi(svalue,0,10);
+    }
+    catch (...) {
+        return EIO;
+    }
+    
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_turbo_mode_set(uint32_t value)
+{
+    try {
+        stringstream ss;
+        ss<<value;
+        write_device(SYSFS_QC71"turbo_mode",ss.str());
+    }
+    catch (...) {
+        return EIO;
+    }
+
+    return SLB_SUCCESS;
+}
+
+

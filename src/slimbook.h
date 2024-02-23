@@ -184,3 +184,9 @@ extern "C" int slb_qc71_silent_mode_get(uint32_t* value);
 
 /* Sets Silent mode */
 extern "C" int slb_qc71_silent_mode_set(uint32_t value);
+
+/* Gets Turbo mode status */
+extern "C" int slb_qc71_turbo_mode_get(uint32_t* value);
+
+/* Sets Turbo mode */
+extern "C" int slb_qc71_turbo_mode_set(uint32_t value);
