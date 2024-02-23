@@ -1,3 +1,9 @@
+libslimbook (1.9.2) jammy; urgency=medium
+
+  * Added get/set turbo settings on Hero/Titan
+
+ -- Slimbook <dev@slimbook.es>  Fri, 23 Feb 2024 15:27:23 +0100
+
 libslimbook (1.9.1) jammy; urgency=medium
 
   * Hero backlight is internally mapped into 0-c8 range
