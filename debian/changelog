@@ -1,3 +1,9 @@
+libslimbook (1.9.3) jammy; urgency=medium
+
+  * Renamed Excalibur scancode constants
+
+ -- Slimbook <dev@slimbook.es>  Tue, 27 Feb 2024 16:27:58 +0100
+
 libslimbook (1.9.2) jammy; urgency=medium
 
   * Added get/set turbo settings on Hero/Titan
