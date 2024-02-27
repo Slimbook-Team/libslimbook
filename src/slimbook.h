@@ -66,8 +66,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_SCAN_QC71_SUPER_LOCK        0x68
 #define SLB_SCAN_QC71_SILENT_MODE       0x69
 #define SLB_SCAN_QC71_TOUCHPAD_SWITCH   0x76
-#define SLB_SCAN_Z16_SILENT_MODE        0xf2
-#define SLB_SCAN_Z16_NORMAL_MODE        0xf9
+
+#define SLB_SCAN_Z16_ENERGY_SAVER_MODE  0xf2
+#define SLB_SCAN_Z16_BALANCED_MODE      0xf9
 #define SLB_SCAN_Z16_PERFORMANCE_MODE   0xe2
 
 typedef struct {
