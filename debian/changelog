@@ -1,3 +1,9 @@
+libslimbook (1.9.4) jammy; urgency=medium
+
+  * Added some initial support for SKU query and matching
+
+ -- Slimbook <dev@slimbook.es>  Fri, 15 Mar 2024 14:56:10 +0100
+
 libslimbook (1.9.3) jammy; urgency=medium
 
   * Renamed Excalibur scancode constants
