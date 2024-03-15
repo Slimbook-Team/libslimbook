@@ -207,6 +207,7 @@ string get_info()
     sout<<"\n";
     
     sout<<"product:"<<slb_info_product_name()<<"\n";
+    sout<<"sku:"<<slb_info_product_sku()<<"\n";
     sout<<"vendor:"<<slb_info_board_vendor()<<"\n";
     sout<<"bios:"<<slb_info_bios_version()<<"\n";
     sout<<"EC:"<<slb_info_ec_firmware_release()<<"\n";

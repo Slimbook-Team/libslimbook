@@ -102,6 +102,9 @@ typedef struct {
 /* Gets DMI product name */
 extern "C" const char* slb_info_product_name();
 
+/* Gets DMI product SKU */
+extern "C" const char* slb_info_product_sku();
+
 /* Gets DMI board vendor */
 extern "C" const char* slb_info_board_vendor();
 
