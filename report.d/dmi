@@ -1,3 +1,10 @@
 #!/bin/sh
 
-dmidecode > $1
+if [ "${SLB_REPORT_PRIVATE}" = "1" ]
+then
+	dmidecode | sed -e 's/Serial.*/Serial Number: ******/' > $1
+else
+	dmidecode > $1
+fi
+
+

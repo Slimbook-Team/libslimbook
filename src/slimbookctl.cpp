@@ -37,6 +37,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <cstdlib>
 #include <ctime>
 
+#define SLB_REPORT_PRIVATE "SLB_REPORT_PRIVATE"
+
 using namespace std;
 
 string generate_id()
@@ -143,6 +145,8 @@ void show_help()
     cout<<"set-kbd-backlight HEX: sets keyboard backlight as 32bit hexadecimal"<<endl;
     cout<<"config-load: loads module settings"<<endl;
     cout<<"config-store: stores module settings to disk"<<endl;
+    cout<<"report: creates a tar.gz with system information"<<endl;
+    cout<<"report-full: same as report, but it also gathers some sensible data as MAC address or board serial number"<<endl;
     cout<<"help: show this help"<<endl;
 }
 
@@ -211,7 +215,15 @@ string get_info()
     sout<<"vendor:"<<slb_info_board_vendor()<<"\n";
     sout<<"bios:"<<slb_info_bios_version()<<"\n";
     sout<<"EC:"<<slb_info_ec_firmware_release()<<"\n";
-    sout<<"serial:"<<slb_info_product_serial()<<"\n";
+    
+    char* env = getenv(SLB_REPORT_PRIVATE);
+    
+    if (env and string(env) == "1") {
+        sout<<"serial: ******\n";
+    }
+    else {
+        sout<<"serial:"<<slb_info_product_serial()<<"\n";
+    }
     
     slb_smbios_entry_t* entries = nullptr;
     int count = 0;
@@ -341,6 +353,11 @@ int main(int argc,char* argv[])
     }
     
     if (command == "report") {
+        setenv(SLB_REPORT_PRIVATE,"1",1);
+        command = "report-full";
+    }
+    
+    if (command == "report-full") {
         
         string id = generate_id();
         string tmp_name = "/tmp/slimbook-report-" + id + "/";
