@@ -3,10 +3,10 @@
 if [ "${SLB_REPORT_PRIVATE}" = "1" ]
 then
 	printf "ip4:\n" > $1
-	ip addr -family inet > $1
+	ip --family inet addr > $1
 	
 	printf "ip6:\n" > $1
-	ip addr -family inet6 > $1
+	ip --family inet6 addr > $1
 else
 	ip addr > $1
 fi
