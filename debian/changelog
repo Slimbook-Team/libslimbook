@@ -1,3 +1,9 @@
+libslimbook (1.10.1) jammy; urgency=medium
+
+  * Fixed bug in private ip report
+
+ -- Slimbook <dev@slimbook.es>  Sat, 23 Mar 2024 16:31:12 +0100
+
 libslimbook (1.10.0) jammy; urgency=medium
 
   * Reports have now a private variant where wifis, macs or serial numbers are hidden
