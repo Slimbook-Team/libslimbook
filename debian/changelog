@@ -1,3 +1,10 @@
+libslimbook (1.11.0) jammy; urgency=medium
+
+  * Included slimbook-hello welcome script
+  * Hero-S have now their own family id
+
+ -- Slimbook <dev@slimbook.es>  Wed, 10 Apr 2024 11:49:42 +0200
+
 libslimbook (1.10.1) jammy; urgency=medium
 
   * Fixed bug in private ip report
