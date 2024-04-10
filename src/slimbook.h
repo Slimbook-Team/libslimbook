@@ -39,7 +39,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #define SLB_MODEL_HERO                  0x0800
 #define SLB_MODEL_HERO_RPL_RTX          0x0801
-#define SLB_MODEL_HERO_S_TGL_RTX        0x0802
 
 #define SLB_MODEL_ESSENTIAL             0x1000
 #define SLB_MODEL_ESSENTIAL_SLIMBOOK    0x1001
@@ -55,6 +54,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_MODEL_EXCALIBUR             0x4000
 #define SLB_MODEL_EXCALIBUR_14_AMD7     0x4001
 #define SLB_MODEL_EXCALIBUR_16_AMD7     0x4002
+
+#define SLB_MODEL_HERO_S                0x8000
+#define SLB_MODEL_HERO_S_TGL_RTX        0x8001
 
 #define SLB_PLATFORM_UNKNOWN            0x0000
 #define SLB_PLATFORM_QC71               0x0100

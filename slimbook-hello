@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Instructions:
+# open a terminal and run:
+# sudo wget https://raw.githubusercontent.com/Slimbook-Team/slimbook/master/slimbook-hello -P /usr/bin && sudo chmod +x /usr/bin/slimbook-hello
+# Exec
+# slimbook-hello
+
+printf "
+ ███████ ██      ██ ███    ███ ██████   ███████   ███████  ██   ██ 
+██       ██      ██ ████  ████ ██   ██ ██     ██ ██     ██ ██  ██  
+ ██████  ██      ██ ██ ████ ██ ██████  ██     ██ ██     ██ █████   
+      ██ ██      ██ ██  ██  ██ ██   ██ ██     ██ ██     ██ ██  ██  
+███████  ███████ ██ ██      ██ ██████   ███████   ███████  ██   ██                                              
+"
+lsb_release -ar 2>/dev/null
+echo "Kernel version: $(uname -r)" 
+echo "Session type:   $XDG_SESSION_TYPE"
+
+echo	
+
+free -h
+
+echo
+
+lsblk /dev/sd* 2>/dev/null
+lsblk /dev/nvme* 2>/dev/null
+
+
+echo
+echo "Feel free to contribute with this code at https://github.com/Slimbook-Team/slimbook/blob/master/slimbook-hello to make this script look even better ;)"

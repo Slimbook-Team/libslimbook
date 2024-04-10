@@ -6,3 +6,5 @@ install_data('slimbook-settings.service', install_dir:'lib/systemd/system/')
 install_data('slimbook-sleep', install_dir:'lib/systemd/system-sleep/')
 install_subdir('report.d', install_dir:'libexec/slimbook/')
 install_data('report-pack', install_dir:'libexec/slimbook/')
+install_data('slimbook-hello', install_dir:'bin/')
+
