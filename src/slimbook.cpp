@@ -77,6 +77,19 @@ database_entry_t database [] = {
     {0,0,0,0,0}
 };
 
+static string pretty_string(string& src)
+{
+    string tmp;
+    
+    for (char c:src) {
+        if (c > 32) {
+            tmp.push_back(c);
+        }
+    }
+    
+    return tmp;
+}
+
 static void read_device(string path,string& out)
 {
     ifstream file;
@@ -206,8 +219,20 @@ const char* slb_info_ec_firmware_release()
 
 uint32_t slb_info_get_model()
 {
-    string product = slb_info_product_name();
-    string vendor = slb_info_board_vendor();
+    string product;
+    string vendor;
+    //string sku;
+    
+    try {
+        read_device(SYSFS_DMI"product_name",product);
+        read_device(SYSFS_DMI"board_vendor",vendor);
+    }
+    catch(...) {
+        return SLB_MODEL_UNKNOWN;
+    }
+    
+    product = pretty_string(product);
+    vendor = pretty_string(vendor);
 
     database_entry_t* entry = database;
     

@@ -36,6 +36,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <filesystem>
 #include <cstdlib>
 #include <ctime>
+#include <sstream>
 
 #define SLB_REPORT_PRIVATE "SLB_REPORT_PRIVATE"
 
@@ -132,6 +133,22 @@ static string to_human(uint64_t value)
     
     return ss.str();
     
+}
+
+static string replace_ugly_chars(string in)
+{
+    stringstream ss;
+    
+    for (char c:in) {
+        if (c > 32) {
+            ss<<c;
+        }
+        else {
+            ss<<"0x"<<std::hex<<(int)c;
+        }
+    }
+    
+    return ss.str();
 }
 
 void show_help()
@@ -396,6 +413,17 @@ int main(int argc,char* argv[])
         
         string targz = "/tmp/slimbook-report-" + id + ".tar.gz"; 
         cout<<"report "<<targz<<endl;
+    }
+    
+    if (command == "show-dmi") {
+        string product_name = slb_info_product_name();
+        string product_sku = slb_info_product_sku();
+        string vendor = slb_info_board_vendor();
+        
+        cout<<"product:["<<replace_ugly_chars(product_name)<<"]"<<endl;
+        cout<<"sku:["<<replace_ugly_chars(product_sku)<<"]"<<endl;
+        cout<<"vendor:["<<replace_ugly_chars(vendor)<<"]"<<endl;
+        
     }
 
     return 0;
