@@ -128,6 +128,9 @@ extern "C" uint32_t slb_info_get_family();
 /* Guess Slimbook platform */
 extern "C" uint32_t slb_info_get_platform();
 
+/* Finds platform from a given model without query DMI */
+extern "C" uint32_t slb_info_find_platform(uint32_t model);
+
 /* Checks if platform module is loaded */
 extern "C" uint32_t slb_info_is_module_loaded();
 

@@ -221,7 +221,6 @@ uint32_t slb_info_get_model()
 {
     string product;
     string vendor;
-    //string sku;
     
     try {
         read_device(SYSFS_DMI"product_name",product);
@@ -254,13 +253,39 @@ uint32_t slb_info_get_family()
 
 uint32_t slb_info_get_platform()
 {
-    string product = slb_info_product_name();
-    string vendor = slb_info_board_vendor();
+    string product;
+    string vendor;
+    
+    try {
+        read_device(SYSFS_DMI"product_name",product);
+        read_device(SYSFS_DMI"board_vendor",vendor);
+    }
+    catch(...) {
+        return SLB_PLATFORM_UNKNOWN;
+    }
+    
+    product = pretty_string(product);
+    vendor = pretty_string(vendor);
 
     database_entry_t* entry = database;
     
     while (entry->model > 0) {
         if (product == entry->product_name and vendor == entry->board_vendor) {
+            return entry->platform;
+        }
+        
+        entry++;
+    }
+
+    return SLB_PLATFORM_UNKNOWN;
+}
+
+uint32_t slb_info_find_platform(uint32_t model)
+{
+    database_entry_t* entry = database;
+    
+    while (entry->model > 0) {
+        if (model == entry->model) {
             return entry->platform;
         }
         
