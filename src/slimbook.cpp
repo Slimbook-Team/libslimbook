@@ -59,8 +59,11 @@ database_entry_t database [] = {
     {"PROX15-AMD", 0, "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_PROX_15_AMD},
     {"PROX-AMD5", 0, "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_PROX_AMD5},
     {"PROX15-AMD5", 0, "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_PROX_15_AMD5},
-    {"Executive", 0, "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_EXECUTIVE_12TH},
-    {"EXECUTIVE-14", 0, "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_EXECUTIVE_14_11TH},
+
+    {"Executive", "Executive-RPL", "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_EXECUTIVE_13TH},
+    {"Executive", "0001", "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_EXECUTIVE_12TH},
+    {"EXECUTIVE-14", 0, "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_EXECUTIVE_11TH},
+
     {"TITAN", 0, "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_TITAN},
     {"HERO-RPL-RTX", 0, "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_HERO_RPL_RTX},
     {"HERO-S-TGL-RTX", 0, "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_HERO_S_TGL_RTX},
@@ -70,8 +73,14 @@ database_entry_t database [] = {
     {"ESS-15-AMD-5", 0, "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ESSENTIAL_15_AMD_5000},
     {"ESSENTIAL-15-11", 0, "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ESSENTIAL_15_11},
     {"ESSENTIAL-15-11 ", 0, "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ESSENTIAL_15_11},
+
     {"Elemental15-I12", 0, "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ELEMENTAL_15_I12},
     {"Elemental14-I12", 0, "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ELEMENTAL_14_I12},
+    {"Elemental15-I12B", 0, "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ELEMENTAL_15_I12B},
+    {"Elemental14-I12B", 0, "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ELEMENTAL_14_I12B},
+    {"Elemental15-I13", 0, "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ELEMENTAL_15_I13},
+    {"Elemental14-I13", 0, "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ELEMENTAL_14_I13},
+
     {"EXCALIBUR-14-AMD7", 0, "SLIMBOOK", SLB_PLATFORM_Z16, SLB_MODEL_EXCALIBUR_14_AMD7},
     {"EXCALIBUR-16-AMD7", 0, "SLIMBOOK", SLB_PLATFORM_Z16, SLB_MODEL_EXCALIBUR_16_AMD7},
     {0,0,0,0,0}
@@ -221,10 +230,12 @@ uint32_t slb_info_get_model()
 {
     string product;
     string vendor;
+    string sku;
     
     try {
         read_device(SYSFS_DMI"product_name",product);
         read_device(SYSFS_DMI"board_vendor",vendor);
+        read_device(SYSFS_DMI"product_sku",sku);
     }
     catch(...) {
         return SLB_MODEL_UNKNOWN;
@@ -232,12 +243,20 @@ uint32_t slb_info_get_model()
     
     product = pretty_string(product);
     vendor = pretty_string(vendor);
+    sku = pretty_string(sku);
 
     database_entry_t* entry = database;
     
     while (entry->model > 0) {
         if (product == entry->product_name and vendor == entry->board_vendor) {
-            return entry->model;
+            if (entry->product_sku) {
+                if (entry->product_sku == sku) {
+                    return entry->model;
+                }
+            }
+            else {
+                return entry->model;
+            }
         }
         
         entry++;
