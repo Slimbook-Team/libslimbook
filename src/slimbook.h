@@ -131,6 +131,9 @@ extern "C" uint32_t slb_info_get_model();
 /* Get Slimbook model family */
 extern "C" uint32_t slb_info_get_family();
 
+/* Get a human readable family name text */
+extern "C" const char* slb_info_get_family_name();
+
 /* Guess Slimbook platform */
 extern "C" uint32_t slb_info_get_platform();
 

@@ -274,22 +274,25 @@ string get_info()
     uint32_t platform = slb_info_get_platform();
     sout<<"platform:0x"<<platform<<"\n";
     
-    bool module_loaded = slb_info_is_module_loaded();
-    sout<<"module loaded:"<<yesno[module_loaded]<<"\n";
+    sout<<"family:"<<slb_info_get_family_name()<<"\n";
     
-    if (module_loaded and platform == SLB_PLATFORM_QC71) {
-        uint32_t value = 0;
-        
-        slb_qc71_fn_lock_get(&value);
-        sout<<"fn lock:"<<yesno[value]<<"\n";
-        
-        slb_qc71_super_lock_get(&value);
-        sout<<"super key lock:"<<yesno[value]<<"\n";
-        
-        slb_qc71_silent_mode_get(&value);
-        sout<<"silent mode:"<<yesno[value]<<"\n";
+    if (platform == SLB_PLATFORM_QC71 or platform == SLB_PLATFORM_CLEVO) {
+        bool module_loaded = slb_info_is_module_loaded();
+        sout<<"module loaded:"<<yesno[module_loaded]<<"\n";
+    
+        if (module_loaded and platform == SLB_PLATFORM_QC71) {
+            uint32_t value = 0;
+            
+            slb_qc71_fn_lock_get(&value);
+            sout<<"fn lock:"<<yesno[value]<<"\n";
+            
+            slb_qc71_super_lock_get(&value);
+            sout<<"super key lock:"<<yesno[value]<<"\n";
+            
+            slb_qc71_silent_mode_get(&value);
+            sout<<"silent mode:"<<yesno[value]<<"\n";
+        }
     }
-    
     sout<<std::flush;
     return sout.str();
 }
@@ -425,6 +428,6 @@ int main(int argc,char* argv[])
         cout<<"vendor:["<<replace_ugly_chars(vendor)<<"]"<<endl;
         
     }
-
+    
     return 0;
 }
