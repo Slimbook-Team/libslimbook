@@ -1,3 +1,12 @@
+libslimbook (1.14.0) noble; urgency=medium
+
+  * Fixed internal model lookup code
+  * Added an efibootmgr report
+  * Added a get family name funcion
+  * Better (or smarter) module info
+
+ -- Slimbook <dev@slimbook.es>  Sun, 02 Jun 2024 17:07:51 +0200
+
 libslimbook (1.13.0) noble; urgency=medium
 
   * Updated model database
