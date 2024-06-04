@@ -1,3 +1,9 @@
+libslimbook (1.14.1) noble; urgency=medium
+
+  * Fixed typo on elemental product name
+
+ -- Slimbook <dev@slimbook.es>  Wed, 05 Jun 2024 00:25:49 +0200
+
 libslimbook (1.14.0) noble; urgency=medium
 
   * Fixed internal model lookup code
