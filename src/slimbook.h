@@ -26,8 +26,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_MODEL_UNKNOWN               0x0000
 
 #define SLB_MODEL_EXECUTIVE             0x0100
-#define SLB_MODEL_EXECUTIVE_14_11TH     0x0101
+#define SLB_MODEL_EXECUTIVE_14_11TH     0x0101 /* left here for compatibility */
+#define SLB_MODEL_EXECUTIVE_11TH        0x0101
 #define SLB_MODEL_EXECUTIVE_12TH        0x0102
+#define SLB_MODEL_EXECUTIVE_13TH        0x0103
 
 #define SLB_MODEL_PROX                  0x0200
 #define SLB_MODEL_PROX_AMD              0x0201
@@ -50,6 +52,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_MODEL_ELEMENTAL             0x2000
 #define SLB_MODEL_ELEMENTAL_15_I12      0x2001
 #define SLB_MODEL_ELEMENTAL_14_I12      0x2002
+#define SLB_MODEL_ELEMENTAL_15_I12B     0x2003
+#define SLB_MODEL_ELEMENTAL_14_I12B     0x2004
+#define SLB_MODEL_ELEMENTAL_15_I13      0x2005
+#define SLB_MODEL_ELEMENTAL_14_I13      0x2006
 
 #define SLB_MODEL_EXCALIBUR             0x4000
 #define SLB_MODEL_EXCALIBUR_14_AMD7     0x4001
@@ -124,6 +130,9 @@ extern "C" uint32_t slb_info_get_model();
 
 /* Get Slimbook model family */
 extern "C" uint32_t slb_info_get_family();
+
+/* Get a human readable family name text */
+extern "C" const char* slb_info_get_family_name();
 
 /* Guess Slimbook platform */
 extern "C" uint32_t slb_info_get_platform();
