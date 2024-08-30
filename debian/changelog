@@ -1,3 +1,9 @@
+libslimbook (1.14.3) noble; urgency=medium
+
+  * Fixed Elemental are all kbd backlight capable
+
+ -- Slimbook <dev@slimbook.es>  Fri, 30 Aug 2024 13:10:58 +0200
+
 libslimbook (1.14.2) noble; urgency=medium
 
   * Added new product strings for Elemental family
