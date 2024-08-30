@@ -536,7 +536,7 @@ int slb_kbd_backlight_get(uint32_t model, uint32_t* color)
         }
     }
     
-    if (model == SLB_MODEL_ELEMENTAL_15_I12 or model == SLB_MODEL_HERO_S_TGL_RTX) {
+    if ((model & SLB_MODEL_ELEMENTAL) > 0 or model == SLB_MODEL_HERO_S_TGL_RTX) {
         try {
             string svalue;
             uint32_t ival;
@@ -598,7 +598,7 @@ int slb_kbd_backlight_set(uint32_t model, uint32_t color)
         }
     }
     
-    if (model == SLB_MODEL_ELEMENTAL_15_I12 or model == SLB_MODEL_HERO_S_TGL_RTX) {
+    if ((model & SLB_MODEL_ELEMENTAL) > 0 or model == SLB_MODEL_HERO_S_TGL_RTX) {
         try {
             stringstream ss;
             ss<<std::hex<<"0x"<<std::setfill('0')<<std::setw(6)<<color;
@@ -643,7 +643,7 @@ int slb_config_load(uint32_t model)
         }
     }
     
-    if (module_loaded and (model == SLB_MODEL_ELEMENTAL_15_I12 or model == SLB_MODEL_HERO_S_TGL_RTX)) {
+    if (module_loaded and ((model & SLB_MODEL_ELEMENTAL) > 0 or model == SLB_MODEL_HERO_S_TGL_RTX)) {
         uint32_t backlight;
 
         if (conf.find_u32("clevo.backlight",backlight)) {
@@ -683,7 +683,7 @@ int slb_config_store(uint32_t model)
             conf.set_u32("qc71.hero.backlight",backlight);
         }
         
-        if (module_loaded and (model == SLB_MODEL_ELEMENTAL_15_I12 or model == SLB_MODEL_HERO_S_TGL_RTX)) {
+        if (module_loaded and ((model & SLB_MODEL_ELEMENTAL) > 0 or model == SLB_MODEL_HERO_S_TGL_RTX)) {
         
             uint32_t backlight = 0;
 
