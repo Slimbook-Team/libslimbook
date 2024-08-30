@@ -1,3 +1,9 @@
+libslimbook (1.14.2) noble; urgency=medium
+
+  * Added new product strings for Elemental family
+
+ -- Slimbook <dev@slimbook.es>  Fri, 30 Aug 2024 10:23:06 +0200
+
 libslimbook (1.14.1) noble; urgency=medium
 
   * Fixed typo on elemental product name
