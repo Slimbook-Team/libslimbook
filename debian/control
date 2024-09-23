@@ -2,8 +2,8 @@ Source: libslimbook
 Section: libs
 Priority: optional
 Maintainer: Slimbook <dev@slimbook.es>
-Build-Depends: debhelper (>=9), meson, ninja-build, g++ (>=11)
-Standards-Version: 3.9.7
+Build-Depends: debhelper-compat (=13), meson, ninja-build, g++ (>=11)
+Standards-Version: 4.6.0
 Homepage: https://github.com/Slimbook-Team/libslimbook
 
 Package: libslimbook1
