@@ -64,6 +64,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_MODEL_HERO_S                0x8000
 #define SLB_MODEL_HERO_S_TGL_RTX        0x8001
 
+#define SLB_MODEL_ZERO              0x01000000
+#define SLB_MODEL_ZERO_I3           0x01000001
+
+#define SLB_MODEL_ONE               0x02000000
+#define SLB_MODEL_ONE_AMD8          0x02000001
+
 #define SLB_PLATFORM_UNKNOWN            0x0000
 #define SLB_PLATFORM_QC71               0x0100
 #define SLB_PLATFORM_CLEVO              0x0200
@@ -78,6 +84,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_SCAN_Z16_ENERGY_SAVER_MODE  0xf2
 #define SLB_SCAN_Z16_BALANCED_MODE      0xf9
 #define SLB_SCAN_Z16_PERFORMANCE_MODE   0xe2
+
+#define SLB_MODULE_NOT_LOADED           0x00
+#define SLB_MODULE_LOADED               0x01
+#define SLB_MODULE_NOT_NEEDED           0x02
+#define SLB_MODULE_UNKNOWN              0x03
 
 typedef struct {
     /* device size in bytes */
@@ -106,6 +117,12 @@ typedef struct {
         slb_smbios_processor_t processor;
     } data;
 } slb_smbios_entry_t;
+
+/* Retrieves DMI info and cache it. No need to call this function */
+extern "C" int32_t slb_info_retrieve();
+
+/* Confidence of model guessing. 0 equals exact matching, beyond 2 is assigned as unknown device */
+extern "C" int32_t slb_info_confidence();
 
 /* Gets DMI product name */
 extern "C" const char* slb_info_product_name();
