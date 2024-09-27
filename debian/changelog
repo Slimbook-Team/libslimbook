@@ -1,3 +1,10 @@
+libslimbook (1.15.5) noble; urgency=medium
+
+  * Updated model database
+  * Matching using vendor (reverted from 1.15)
+
+ -- Slimbook <dev@slimbook.es>  Fri, 27 Sep 2024 10:17:27 +0200
+
 libslimbook (1.15.0) noble; urgency=medium
 
   * Using a new approach identifiying devices
