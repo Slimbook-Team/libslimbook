@@ -8,7 +8,7 @@ Homepage: https://github.com/Slimbook-Team/libslimbook
 
 Package: libslimbook1
 Architecture: amd64
-Depends: ${shlibs:Depends}, ${misc:Depends}, libc6 (>= 2.36), libgcc-s1 (>= 3.3.1), libstdc++6 (>= 12.2)
+Depends: ${misc:Depends}, libc6 (>= 2.36), libgcc-s1 (>= 3.3.1), libstdc++6 (>= 12.2)
 Description: Slimbook hardware identification library
  This shared library identifies Slimbook hardware model
 

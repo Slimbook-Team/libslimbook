@@ -1,4 +1,4 @@
-libslimbook (1.15.6) noble; urgency=medium
+libslimbook (1.15.7) noble; urgency=medium
 
   * Added new model to database
   * Using Debian-friendly dependency versions
