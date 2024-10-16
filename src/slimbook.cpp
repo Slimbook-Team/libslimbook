@@ -88,6 +88,9 @@ database_entry_t database [] = {
     {"EXCALIBUR-16-AMD8", 0, "SLIMBOOK", SLB_PLATFORM_Z16, SLB_MODEL_EXCALIBUR_16_AMD8},
     {"EXCALIBUR-16R-AMD8", 0, "SLIMBOOK", SLB_PLATFORM_HMT16, SLB_MODEL_EXCALIBUR_16R_AMD8},
     
+    {"EVO14-A8", 0, "SLIMBOOK", SLB_PLATFORM_IDL, SLB_MODEL_EVO_14_A8},
+    {"CREA15-A8-RTX", 0, "SLIMBOOK", SLB_PLATFORM_IDA, SLB_MODEL_CREATIVE_15_A8_RTX},
+
     {"ZERO-N100-4RJ", 0, "SLIMBOOK", SLB_PLATFORM_UNKNOWN, SLB_MODEL_ZERO_N100_4RJ},
     {"ZERO-V5", 0, "SLIMBOOK", SLB_PLATFORM_UNKNOWN, SLB_MODEL_ZERO_V5},
 
@@ -114,6 +117,8 @@ family_t family_database [] = {
     {SLB_MODEL_EXCALIBUR,"excalibur"},
     {SLB_MODEL_HERO_S,"hero-s"},
     {SLB_MODEL_ZERO,"zero"},
+    {SLB_MODEL_EVO,"evo"},
+    {SLB_MODEL_CREATIVE,"creative"},
     {SLB_MODEL_ONE,"one"},
     {SLB_MODEL_NAS,"nas"},
     {SLB_MODEL_UNKNOWN,"unknown"}
@@ -499,6 +504,14 @@ uint32_t slb_info_is_module_loaded()
     }
 
     if (platform == SLB_PLATFORM_HMT16) {
+        return SLB_MODULE_NOT_NEEDED;
+    }
+
+    if (platform == SLB_PLATFORM_IDL) {
+        return SLB_MODULE_NOT_NEEDED;
+    }
+
+    if (platform == SLB_PLATFORM_IDA) {
         return SLB_MODULE_NOT_NEEDED;
     }
     
