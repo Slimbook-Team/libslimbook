@@ -1,3 +1,9 @@
+libslimbook (1.15.8) noble; urgency=medium
+
+  * Back to auto-computed shared libs dependencies
+
+ -- Slimbook <dev@slimbook.es>  Thu, 17 Oct 2024 09:59:31 +0200
+
 libslimbook (1.15.7) noble; urgency=medium
 
   * Added new model to database
