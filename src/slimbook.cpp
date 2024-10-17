@@ -81,9 +81,23 @@ database_entry_t database [] = {
     {"Elemental14-I12B", 0, "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ELEMENTAL_14_I12B},
     {"Elemental15-I13", 0, "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ELEMENTAL_15_I13},
     {"Elemental14-I13", 0, "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ELEMENTAL_14_I13},
+    {"ELEMENTAL 15-I13", 0, "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ELEMENTAL_15_I13},
+    {"ELEMENTAL 14-I13", 0, "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ELEMENTAL_14_I13},
 
-    {"EXCALIBUR-14-AMD7", 0, "SLIMBOOK", SLB_PLATFORM_Z16, SLB_MODEL_EXCALIBUR_14_AMD7},
     {"EXCALIBUR-16-AMD7", 0, "SLIMBOOK", SLB_PLATFORM_Z16, SLB_MODEL_EXCALIBUR_16_AMD7},
+    {"EXCALIBUR-16-AMD8", 0, "SLIMBOOK", SLB_PLATFORM_Z16, SLB_MODEL_EXCALIBUR_16_AMD8},
+    {"EXCALIBUR-16R-AMD8", 0, "SLIMBOOK", SLB_PLATFORM_HMT16, SLB_MODEL_EXCALIBUR_16R_AMD8},
+    
+    {"EVO14-A8", 0, "SLIMBOOK", SLB_PLATFORM_IDL, SLB_MODEL_EVO_14_A8},
+    {"CREA15-A8-RTX", 0, "SLIMBOOK", SLB_PLATFORM_IDA, SLB_MODEL_CREATIVE_15_A8_RTX},
+
+    {"ZERO-N100-4RJ", 0, "SLIMBOOK", SLB_PLATFORM_UNKNOWN, SLB_MODEL_ZERO_N100_4RJ},
+    {"ZERO-V5", 0, "SLIMBOOK", SLB_PLATFORM_UNKNOWN, SLB_MODEL_ZERO_V5},
+
+    {"ONE-AMD8", 0, "SLIMBOOK", SLB_PLATFORM_UNKNOWN, SLB_MODEL_ONE_AMD8},
+
+    {"NAS-AMD8-8HDD-4RJ", 0, "SLIMBOOK", SLB_PLATFORM_UNKNOWN, SLB_MODEL_NAS_AMD8_8HDD_4RJ},
+
     {0,0,0,0,0}
 };
 
@@ -102,10 +116,70 @@ family_t family_database [] = {
     {SLB_MODEL_ELEMENTAL,"elemental"},
     {SLB_MODEL_EXCALIBUR,"excalibur"},
     {SLB_MODEL_HERO_S,"hero-s"},
+    {SLB_MODEL_ZERO,"zero"},
+    {SLB_MODEL_EVO,"evo"},
+    {SLB_MODEL_CREATIVE,"creative"},
+    {SLB_MODEL_ONE,"one"},
+    {SLB_MODEL_NAS,"nas"},
     {SLB_MODEL_UNKNOWN,"unknown"}
 };
 
-static string pretty_string(string& src)
+/* cached info */
+bool info_cached = false;
+string info_vendor;
+string info_product;
+string info_sku;
+string info_bios_version;
+string info_ec_firmware_release;
+string info_serial;
+
+uint32_t info_platform;
+uint32_t info_model;
+int32_t info_confidence;
+
+static int min3i(int a,int b,int c)
+{
+    if (a <= b && a <= c) {
+        return a;
+    }
+    else {
+        if(b <= a && b <= c) {
+            return b;
+        }
+        else {
+            if(c <= a && c <= b) {
+                return c;
+            }
+        }
+    }
+
+    // may we land here?
+    return -1;
+}
+
+/*
+ Based on this:
+ https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#C
+*/
+static int levenshtein(const char* s1, const char* s2)
+{
+    unsigned int x, y, s1len, s2len;
+    s1len = strlen(s1);
+    s2len = strlen(s2);
+    unsigned int matrix[s2len+1][s1len+1];
+    matrix[0][0] = 0;
+    for (x = 1; x <= s2len; x++)
+        matrix[x][0] = matrix[x-1][0] + 1;
+    for (y = 1; y <= s1len; y++)
+        matrix[0][y] = matrix[0][y-1] + 1;
+    for (x = 1; x <= s2len; x++)
+        for (y = 1; y <= s1len; y++)
+            matrix[x][y] = min3i(matrix[x-1][y] + 1, matrix[x][y-1] + 1, matrix[x-1][y-1] + (s1[y-1] == s2[x-1] ? 0 : 1));
+
+    return(matrix[s2len][s1len]);
+}
+
+static string pretty_string(string src)
 {
 
     bool start = false;
@@ -128,7 +202,14 @@ static string pretty_string(string& src)
         return "";
     }
     
-    return src.substr(first,(end-first)+1);
+    string out;
+    
+    for (size_t n=first;n<(end+1);n++) {
+        char c = std::tolower(src[n]);
+        out+=c;
+    }
+    
+    return out;
 }
 
 static void read_device(string path,string& out)
@@ -186,115 +267,183 @@ static uint32_t get_model_platform(uint32_t model)
     return SLB_PLATFORM_UNKNOWN;
 }
 
-const char* slb_info_product_name()
+int32_t slb_info_retrieve()
 {
+    if (info_cached) {
+        return 0;
+    }
+    
     try {
-        buffer.clear();
-        read_device(SYSFS_DMI"product_name",buffer);
-        return buffer.c_str();
+        read_device(SYSFS_DMI"product_name", info_product);
     }
     catch (...) {
-        return nullptr;
+        info_product = "<empty>";
     }
+    
+    try {
+        read_device(SYSFS_DMI"product_sku", info_sku);
+    }
+    catch (...) {
+        info_sku = "<empty>";
+    }
+    
+    try {
+        read_device(SYSFS_DMI"board_vendor", info_vendor);
+    }
+    catch (...) {
+        info_vendor = "<empty>";
+    }
+    
+    try {
+        read_device(SYSFS_DMI"bios_version", info_bios_version);
+    }
+    catch (...) {
+        info_bios_version = "<empty>";
+    }
+    
+    try {
+        read_device(SYSFS_DMI"ec_firmware_release", info_ec_firmware_release);
+    }
+    catch (...) {
+        info_ec_firmware_release = "<empty>";
+    }
+    
+    try {
+        read_device(SYSFS_DMI"serial", info_serial);
+    }
+    catch (...) {
+        info_serial = "<empty>";
+    }
+    
+    string pretty_product = pretty_string(info_product);
+    string pretty_vendor = pretty_string(info_vendor);
+    string pretty_sku = pretty_string(info_sku);
+    
+    database_entry_t* entry = database;
+    database_entry_t* min_entry = entry;
+    int min_dist = 0xFFFF;
+    
+    vector<database_entry_t*> drawn;
+    
+    while (entry->model > 0) {
+        string source_vendor = pretty_vendor;
+        string target_vendor = pretty_string(entry->board_vendor);
+
+        // vendor is a strict comparision
+        if (source_vendor == target_vendor) {
+
+            string source = pretty_product;
+            string target = pretty_string(entry->product_name);
+
+            int dist = levenshtein(source.c_str(),target.c_str());
+
+            if (dist < min_dist) {
+                min_dist = dist;
+                min_entry = entry;
+            }
+
+            if (dist == 0) {
+                drawn.push_back(entry);
+            }
+        }
+        entry++;
+    }
+    
+    info_confidence = min_dist;
+    
+    if (min_dist == 0) {
+        if (drawn.size() > 0) {
+            database_entry_t* min_sku = drawn[0];
+            int min_dist_sku = 0xFFFF;
+            
+            for (database_entry_t* drawn_entry: drawn) {
+                if (drawn_entry->product_sku) {
+                    int dist = levenshtein(drawn_entry->product_sku, pretty_sku.c_str());
+                    
+                    if (dist < min_dist_sku) {
+                        min_sku = drawn_entry;
+                        min_dist_sku = dist;
+                    }
+                    
+                }
+            }
+            
+            min_entry = min_sku;
+        }
+    }
+    else {
+        if (min_dist > 2) {
+            info_model = SLB_MODEL_UNKNOWN;
+            info_platform = SLB_PLATFORM_UNKNOWN;
+
+            info_cached = true;
+            
+            return 1;
+        }
+    }
+    
+    info_model = min_entry->model;
+    info_platform = min_entry->platform;
+    
+    info_cached = true;
+    
+    return 0;
+}
+
+int32_t slb_info_confidence()
+{
+    slb_info_retrieve();
+    
+    return info_confidence;
+}
+
+const char* slb_info_product_name()
+{
+    slb_info_retrieve();
+    
+    return info_product.c_str();
 }
 
 const char* slb_info_product_sku()
 {
-    try {
-        buffer.clear();
-        read_device(SYSFS_DMI"product_sku",buffer);
-        return buffer.c_str();
-    }
-    catch (...) {
-        return nullptr;
-    }
+    slb_info_retrieve();
+    
+    return info_sku.c_str();
 }
 
 const char* slb_info_board_vendor()
 {
-    try {
-        buffer.clear();
-        read_device(SYSFS_DMI"board_vendor",buffer);
-        return buffer.c_str();
-    }
-    catch (...) {
-        return nullptr;
-    }
+    slb_info_retrieve();
+    
+    return info_vendor.c_str();
 }
 
 const char* slb_info_product_serial()
 {
-    try {
-        buffer.clear();
-        read_device(SYSFS_DMI"product_serial",buffer);
-        return buffer.c_str();
-    }
-    catch (...) {
-        return nullptr;
-    }
+    slb_info_retrieve();
+    
+    return info_serial.c_str();
 }
 
 const char* slb_info_bios_version()
 {
-    try {
-        buffer.clear();
-        read_device(SYSFS_DMI"bios_version",buffer);
-        return buffer.c_str();
-    }
-    catch (...) {
-        return nullptr;
-    }
+    slb_info_retrieve();
+    
+    return info_bios_version.c_str();
 }
 
 const char* slb_info_ec_firmware_release()
 {
-    try {
-        buffer.clear();
-        read_device(SYSFS_DMI"ec_firmware_release",buffer);
-        return buffer.c_str();
-    }
-    catch (...) {
-        return nullptr;
-    }
+    slb_info_retrieve();
+    
+    return info_ec_firmware_release.c_str();
 }
 
 uint32_t slb_info_get_model()
 {
-    string product;
-    string vendor;
-    string sku;
+    slb_info_retrieve();
     
-    try {
-        read_device(SYSFS_DMI"product_name",product);
-        read_device(SYSFS_DMI"board_vendor",vendor);
-        read_device(SYSFS_DMI"product_sku",sku);
-    }
-    catch(...) {
-        return SLB_MODEL_UNKNOWN;
-    }
-    
-    product = pretty_string(product);
-    vendor = pretty_string(vendor);
-    sku = pretty_string(sku);
-    
-    database_entry_t* entry = database;
-    
-    while (entry->model > 0) {
-        if (product == entry->product_name and vendor == entry->board_vendor) {
-            if (entry->product_sku) {
-                if (entry->product_sku == sku) {
-                    return entry->model;
-                }
-            }
-            else {
-                return entry->model;
-            }
-        }
-        
-        entry++;
-    }
-    
-    return SLB_MODEL_UNKNOWN;
+    return info_model;
 }
 
 uint32_t slb_info_get_family()
@@ -322,31 +471,9 @@ const char* slb_info_get_family_name()
 
 uint32_t slb_info_get_platform()
 {
-    string product;
-    string vendor;
-    
-    try {
-        read_device(SYSFS_DMI"product_name",product);
-        read_device(SYSFS_DMI"board_vendor",vendor);
-    }
-    catch(...) {
-        return SLB_PLATFORM_UNKNOWN;
-    }
-    
-    product = pretty_string(product);
-    vendor = pretty_string(vendor);
+    slb_info_retrieve();
 
-    database_entry_t* entry = database;
-    
-    while (entry->model > 0) {
-        if (product == entry->product_name and vendor == entry->board_vendor) {
-            return entry->platform;
-        }
-        
-        entry++;
-    }
-
-    return SLB_PLATFORM_UNKNOWN;
+    return info_platform;
 }
 
 uint32_t slb_info_find_platform(uint32_t model)
@@ -369,22 +496,38 @@ uint32_t slb_info_is_module_loaded()
     uint32_t platform = slb_info_get_platform();
     
     if (platform == SLB_PLATFORM_UNKNOWN) {
-        return 0;
+        return SLB_MODULE_UNKNOWN;
+    }
+    
+    if (platform == SLB_PLATFORM_Z16) {
+        return SLB_MODULE_NOT_NEEDED;
+    }
+
+    if (platform == SLB_PLATFORM_HMT16) {
+        return SLB_MODULE_NOT_NEEDED;
+    }
+
+    if (platform == SLB_PLATFORM_IDL) {
+        return SLB_MODULE_NOT_NEEDED;
+    }
+
+    if (platform == SLB_PLATFORM_IDA) {
+        return SLB_MODULE_NOT_NEEDED;
     }
     
     vector<string> modules = get_modules();
     
     for (string mod : modules) {
         if (platform == SLB_PLATFORM_QC71 and mod == MODULE_QC71) {
-            return 1;
+            return SLB_MODULE_LOADED;
         }
         
         if (platform == SLB_PLATFORM_CLEVO and mod == MODULE_CLEVO) {
-            return 1;
+            return SLB_MODULE_LOADED;
         }
     }
     
-    return 0;
+    return SLB_MODULE_NOT_LOADED;
 }
 
 int64_t slb_info_uptime()
@@ -534,7 +677,7 @@ int slb_kbd_backlight_get(uint32_t model, uint32_t* color)
         }
     }
     
-    if (model == SLB_MODEL_ELEMENTAL_15_I12 or model == SLB_MODEL_HERO_S_TGL_RTX) {
+    if ((model & SLB_MODEL_ELEMENTAL) > 0 or model == SLB_MODEL_HERO_S_TGL_RTX) {
         try {
             string svalue;
             uint32_t ival;
@@ -596,7 +739,7 @@ int slb_kbd_backlight_set(uint32_t model, uint32_t color)
         }
     }
     
-    if (model == SLB_MODEL_ELEMENTAL_15_I12 or model == SLB_MODEL_HERO_S_TGL_RTX) {
+    if ((model & SLB_MODEL_ELEMENTAL) > 0 or model == SLB_MODEL_HERO_S_TGL_RTX) {
         try {
             stringstream ss;
             ss<<std::hex<<"0x"<<std::setfill('0')<<std::setw(6)<<color;
@@ -641,7 +784,7 @@ int slb_config_load(uint32_t model)
         }
     }
     
-    if (module_loaded and (model == SLB_MODEL_ELEMENTAL_15_I12 or model == SLB_MODEL_HERO_S_TGL_RTX)) {
+    if (module_loaded and ((model & SLB_MODEL_ELEMENTAL) > 0 or model == SLB_MODEL_HERO_S_TGL_RTX)) {
         uint32_t backlight;
 
         if (conf.find_u32("clevo.backlight",backlight)) {
@@ -681,7 +824,7 @@ int slb_config_store(uint32_t model)
             conf.set_u32("qc71.hero.backlight",backlight);
         }
         
-        if (module_loaded and (model == SLB_MODEL_ELEMENTAL_15_I12 or model == SLB_MODEL_HERO_S_TGL_RTX)) {
+        if (module_loaded and ((model & SLB_MODEL_ELEMENTAL) > 0 or model == SLB_MODEL_HERO_S_TGL_RTX)) {
         
             uint32_t backlight = 0;
 
@@ -826,5 +969,3 @@ int slb_qc71_turbo_mode_set(uint32_t value)
 
     return SLB_SUCCESS;
 }
-
-

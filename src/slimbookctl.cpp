@@ -172,6 +172,11 @@ string get_info()
     stringstream sout;
     
     map<int,string> yesno = {{0,"no"},{1,"yes"}};
+    map<int,string> module_status_string = {{SLB_MODULE_NOT_LOADED,"no"},
+                                            {SLB_MODULE_LOADED,"yes"},
+                                            {SLB_MODULE_NOT_NEEDED,"not needed"},
+                                            {SLB_MODULE_UNKNOWN,"unknown"}
+                                            };
     
     int64_t uptime = slb_info_uptime();
     int64_t h = uptime / 3600;
@@ -269,30 +274,38 @@ string get_info()
     
     sout<<"\n";
     
-    sout<<"model:0x"<<std::hex<<slb_info_get_model()<<"\n";
+    uint32_t model = slb_info_get_model();
+    sout<<"model:0x"<<std::hex<<model<<"\n";
     
     uint32_t platform = slb_info_get_platform();
     sout<<"platform:0x"<<platform<<"\n";
     
     sout<<"family:"<<slb_info_get_family_name()<<"\n";
     
-    if (platform == SLB_PLATFORM_QC71 or platform == SLB_PLATFORM_CLEVO) {
-        bool module_loaded = slb_info_is_module_loaded();
-        sout<<"module loaded:"<<yesno[module_loaded]<<"\n";
+    int32_t confidence = slb_info_confidence();
     
-        if (module_loaded and platform == SLB_PLATFORM_QC71) {
-            uint32_t value = 0;
-            
-            slb_qc71_fn_lock_get(&value);
-            sout<<"fn lock:"<<yesno[value]<<"\n";
-            
-            slb_qc71_super_lock_get(&value);
-            sout<<"super key lock:"<<yesno[value]<<"\n";
-            
-            slb_qc71_silent_mode_get(&value);
-            sout<<"silent mode:"<<yesno[value]<<"\n";
-        }
+    if (model != SLB_MODEL_UNKNOWN and confidence > 0) {
+        sout<<"confidence:"<<std::dec<<confidence<<"\n";
     }
+    
+    int module_status = slb_info_is_module_loaded();
+    sout<<"module loaded:"<<module_status_string[module_status]<<"\n";
+    
+    sout<<"\n";
+    
+    if (module_status == SLB_MODULE_LOADED and platform == SLB_PLATFORM_QC71) {
+        uint32_t value = 0;
+        
+        slb_qc71_fn_lock_get(&value);
+        sout<<"fn lock:"<<yesno[value]<<"\n";
+        
+        slb_qc71_super_lock_get(&value);
+        sout<<"super key lock:"<<yesno[value]<<"\n";
+        
+        slb_qc71_silent_mode_get(&value);
+        sout<<"silent mode:"<<yesno[value]<<"\n";
+    }
+    
     sout<<std::flush;
     return sout.str();
 }

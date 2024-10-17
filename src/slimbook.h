@@ -58,16 +58,37 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_MODEL_ELEMENTAL_14_I13      0x2006
 
 #define SLB_MODEL_EXCALIBUR             0x4000
-#define SLB_MODEL_EXCALIBUR_14_AMD7     0x4001
 #define SLB_MODEL_EXCALIBUR_16_AMD7     0x4002
+#define SLB_MODEL_EXCALIBUR_16_AMD8     0x4003
+#define SLB_MODEL_EXCALIBUR_16R_AMD8    0x4004
 
 #define SLB_MODEL_HERO_S                0x8000
 #define SLB_MODEL_HERO_S_TGL_RTX        0x8001
+
+#define SLB_MODEL_EVO                 0x010000
+#define SLB_MODEL_EVO_14_A8           0x010001
+
+#define SLB_MODEL_CREATIVE            0x020000
+#define SLB_MODEL_CREATIVE_15_A8_RTX  0x020001
+
+#define SLB_MODEL_ZERO              0x01000000
+#define SLB_MODEL_ZERO_V4           0x01000001
+#define SLB_MODEL_ZERO_V5           0x01000002
+#define SLB_MODEL_ZERO_N100_4RJ     0x01000003
+
+#define SLB_MODEL_ONE               0x02000000
+#define SLB_MODEL_ONE_AMD8          0x02000001
+
+#define SLB_MODEL_NAS               0x04000000
+#define SLB_MODEL_NAS_AMD8_8HDD_4RJ 0x04000001
 
 #define SLB_PLATFORM_UNKNOWN            0x0000
 #define SLB_PLATFORM_QC71               0x0100
 #define SLB_PLATFORM_CLEVO              0x0200
 #define SLB_PLATFORM_Z16                0x0400
+#define SLB_PLATFORM_HMT16              0x0800
+#define SLB_PLATFORM_IDL              0x010000
+#define SLB_PLATFORM_IDA              0x020000
 
 #define SLB_MAX_PROCESSOR_VERSION  48
 
@@ -75,9 +96,22 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_SCAN_QC71_SILENT_MODE       0x69
 #define SLB_SCAN_QC71_TOUCHPAD_SWITCH   0x76
 
-#define SLB_SCAN_Z16_ENERGY_SAVER_MODE  0xf2
-#define SLB_SCAN_Z16_BALANCED_MODE      0xf9
-#define SLB_SCAN_Z16_PERFORMANCE_MODE   0xe2
+#define SLB_SCAN_ENERGY_SAVER_MODE  0xf2
+#define SLB_SCAN_BALANCED_MODE      0xf9
+#define SLB_SCAN_PERFORMANCE_MODE   0xe2
+
+#define SLB_SCAN_Z16_ENERGY_SAVER_MODE  SLB_SCAN_ENERGY_SAVER_MODE
+#define SLB_SCAN_Z16_BALANCED_MODE      SLB_SCAN_BALANCED_MODE
+#define SLB_SCAN_Z16_PERFORMANCE_MODE   SLB_SCAN_PERFORMANCE_MODE
+
+#define SLB_SCAN_HMT16_ENERGY_SAVER_MODE  SLB_SCAN_ENERGY_SAVER_MODE
+#define SLB_SCAN_HMT16_BALANCED_MODE      SLB_SCAN_BALANCED_MODE
+#define SLB_SCAN_HMT16_PERFORMANCE_MODE   SLB_SCAN_PERFORMANCE_MODE
+
+#define SLB_MODULE_NOT_LOADED           0x00
+#define SLB_MODULE_LOADED               0x01
+#define SLB_MODULE_NOT_NEEDED           0x02
+#define SLB_MODULE_UNKNOWN              0x03
 
 typedef struct {
     /* device size in bytes */
@@ -106,6 +140,12 @@ typedef struct {
         slb_smbios_processor_t processor;
     } data;
 } slb_smbios_entry_t;
+
+/* Retrieves DMI info and cache it. No need to call this function */
+extern "C" int32_t slb_info_retrieve();
+
+/* Confidence of model guessing. 0 equals exact matching, beyond 2 is assigned as unknown device */
+extern "C" int32_t slb_info_confidence();
 
 /* Gets DMI product name */
 extern "C" const char* slb_info_product_name();
