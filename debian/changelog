@@ -1,3 +1,9 @@
+libslimbook (1.15.8-jammy) jammy; urgency=medium
+
+  * backport from noble
+
+ -- Slimbook <dev@slimbook.es>  Thu, 17 Oct 2024 17:40:43 +0200
+
 libslimbook (1.14.1) jammy; urgency=medium
 
   * Fixed typo on elemental product name
