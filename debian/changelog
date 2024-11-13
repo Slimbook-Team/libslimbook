@@ -1,4 +1,4 @@
-libslimbook (1.15.8+bpo0) jammy; urgency=medium
+libslimbook (1.15.8+bpo0) focal; urgency=medium
 
   * backport from noble
 
