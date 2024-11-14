@@ -1,3 +1,9 @@
+libslimbook (1.15.9~bpo0) focal; urgency=medium
+
+  * Enforcing C++17 at build
+
+ -- Slimbook <dev@slimbook.es>  Thu, 14 Nov 2024 10:57:34 +0100
+
 libslimbook (1.15.8+bpo1) focal; urgency=medium
 
   * backport from noble
