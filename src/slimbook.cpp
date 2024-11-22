@@ -590,6 +590,8 @@ const char* slb_info_keyboard_device()
     switch (platform) {
         case SLB_PLATFORM_QC71:
         case SLB_PLATFORM_Z16:
+        case SLB_PLATFORM_IDL:
+        case SLB_PLATFORM_IDA:
             buffer = "/dev/input/by-path/platform-i8042-serio-0-event-kbd";
             return buffer.c_str();
         break;
@@ -621,6 +623,8 @@ const char* slb_info_touchpad_device()
     
     switch (platform) {
         case SLB_PLATFORM_QC71:
+        case SLB_PLATFORM_IDL:
+        case SLB_PLATFORM_IDA:
             buffer = "/dev/input/by-path/platform-AMDI0010:01-event-mouse";
             return buffer.c_str();
         break;
