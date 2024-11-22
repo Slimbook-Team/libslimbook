@@ -1,3 +1,10 @@
+libslimbook (1.15.9) noble; urgency=medium
+
+  * Enforcing C++17 at build
+  * Added touchpad and keyboard device paths for Evo and Creative
+
+ -- Slimbook <dev@slimbook.es>  Fri, 22 Nov 2024 10:24:56 +0100
+
 libslimbook (1.15.8) noble; urgency=medium
 
   * Back to auto-computed shared libs dependencies
