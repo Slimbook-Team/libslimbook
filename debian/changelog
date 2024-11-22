@@ -1,3 +1,9 @@
+libslimbook (1.15.10) noble; urgency=medium
+
+  * Created a generic touchpad switch constant
+
+ -- Slimbook <dev@slimbook.es>  Fri, 22 Nov 2024 11:05:12 +0100
+
 libslimbook (1.15.9) noble; urgency=medium
 
   * Enforcing C++17 at build
