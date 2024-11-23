@@ -1,3 +1,9 @@
+libslimbook (1.16.0) noble; urgency=medium
+
+  * Removed IDA/IDL platforms and moved new models to QC71
+
+ -- Slimbook <dev@slimbook.es>  Sat, 23 Nov 2024 13:37:57 +0100
+
 libslimbook (1.15.10) noble; urgency=medium
 
   * Created a generic touchpad switch constant
