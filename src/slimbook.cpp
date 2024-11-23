@@ -88,8 +88,8 @@ database_entry_t database [] = {
     {"EXCALIBUR-16-AMD8", 0, "SLIMBOOK", SLB_PLATFORM_Z16, SLB_MODEL_EXCALIBUR_16_AMD8},
     {"EXCALIBUR-16R-AMD8", 0, "SLIMBOOK", SLB_PLATFORM_HMT16, SLB_MODEL_EXCALIBUR_16R_AMD8},
     
-    {"EVO14-A8", 0, "SLIMBOOK", SLB_PLATFORM_IDL, SLB_MODEL_EVO_14_A8},
-    {"CREA15-A8-RTX", 0, "SLIMBOOK", SLB_PLATFORM_IDA, SLB_MODEL_CREATIVE_15_A8_RTX},
+    {"EVO14-A8", 0, "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_EVO_14_A8},
+    {"CREA15-A8-RTX", 0, "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_CREATIVE_15_A8_RTX},
 
     {"ZERO-N100-4RJ", 0, "SLIMBOOK", SLB_PLATFORM_UNKNOWN, SLB_MODEL_ZERO_N100_4RJ},
     {"ZERO-V5", 0, "SLIMBOOK", SLB_PLATFORM_UNKNOWN, SLB_MODEL_ZERO_V5},
@@ -507,14 +507,6 @@ uint32_t slb_info_is_module_loaded()
         return SLB_MODULE_NOT_NEEDED;
     }
 
-    if (platform == SLB_PLATFORM_IDL) {
-        return SLB_MODULE_NOT_NEEDED;
-    }
-
-    if (platform == SLB_PLATFORM_IDA) {
-        return SLB_MODULE_NOT_NEEDED;
-    }
-    
     vector<string> modules = get_modules();
     
     for (string mod : modules) {
@@ -590,8 +582,7 @@ const char* slb_info_keyboard_device()
     switch (platform) {
         case SLB_PLATFORM_QC71:
         case SLB_PLATFORM_Z16:
-        case SLB_PLATFORM_IDL:
-        case SLB_PLATFORM_IDA:
+        case SLB_PLATFORM_HMT16:
             buffer = "/dev/input/by-path/platform-i8042-serio-0-event-kbd";
             return buffer.c_str();
         break;
@@ -623,8 +614,6 @@ const char* slb_info_touchpad_device()
     
     switch (platform) {
         case SLB_PLATFORM_QC71:
-        case SLB_PLATFORM_IDL:
-        case SLB_PLATFORM_IDA:
             buffer = "/dev/input/by-path/platform-AMDI0010:01-event-mouse";
             return buffer.c_str();
         break;

@@ -87,8 +87,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_PLATFORM_CLEVO              0x0200
 #define SLB_PLATFORM_Z16                0x0400
 #define SLB_PLATFORM_HMT16              0x0800
-#define SLB_PLATFORM_IDL              0x010000
-#define SLB_PLATFORM_IDA              0x020000
 
 #define SLB_MAX_PROCESSOR_VERSION  48
 
