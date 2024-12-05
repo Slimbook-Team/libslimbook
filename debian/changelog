@@ -1,3 +1,9 @@
+libslimbook (1.17.0) noble; urgency=medium
+
+  * Better handling performance profiles
+
+ -- Slimbook <dev@slimbook.es>  Thu, 05 Dec 2024 11:34:49 +0100
+
 libslimbook (1.16.0) noble; urgency=medium
 
   * Removed IDA/IDL platforms and moved new models to QC71
