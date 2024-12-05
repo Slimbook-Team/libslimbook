@@ -962,3 +962,107 @@ int slb_qc71_turbo_mode_set(uint32_t value)
 
     return SLB_SUCCESS;
 }
+
+int slb_qc71_profile_get(uint32_t* value)
+{
+    int status = EIO;
+    uint32_t silent;
+    uint32_t turbo;
+
+    *value = SLB_QC71_PROFILE_UNKNOWN;
+
+    switch (slb_info_get_family()) {
+        case SLB_MODEL_PROX:
+        case SLB_MODEL_EXECUTIVE:
+            status = slb_qc71_silent_mode_get(&silent);
+
+            if (status == SLB_SUCCESS) {
+                if (silent == 1) {
+                    *value = SLB_QC71_PROFILE_SILENT;
+                }
+                if (silent == 0) {
+                    *value = SLB_QC71_PROFILE_NORMAL;
+                }
+            }
+        break;
+
+        case SLB_MODEL_TITAN:
+        case SLB_MODEL_HERO:
+        case SLB_MODEL_EVO:
+        case SLB_MODEL_CREATIVE:
+
+            status = slb_qc71_silent_mode_get(&silent);
+
+            if (status == SLB_SUCCESS) {
+                status = slb_qc71_turbo_mode_get(&turbo);
+
+                if (status == SLB_SUCCESS) {
+
+                    if (silent == 1 and turbo == 0) {
+                        /* aka ENERGY SAVER */
+                        *value = SLB_QC71_PROFILE_SILENT;
+                    }
+
+                    if (silent == 0 and turbo == 0) {
+                        /* aka BALANCED */
+                        *value = SLB_QC71_PROFILE_NORMAL;
+                    }
+
+                    if (silent == 0 and turbo == 1) {
+                        *value = SLB_QC71_PROFILE_PERFORMANCE;
+                    }
+                }
+            }
+        break;
+
+    }
+
+    return status;
+}
+
+int slb_qc71_profile_set(uint32_t value)
+{
+    int status = EIO;
+
+    switch (slb_info_get_family()) {
+        case SLB_MODEL_PROX:
+        case SLB_MODEL_EXECUTIVE:
+            switch (value) {
+                case SLB_QC71_PROFILE_SILENT:
+                    status = slb_qc71_silent_mode_set(1);
+                break;
+
+                case SLB_QC71_PROFILE_NORMAL:
+                    status = slb_qc71_silent_mode_set(0);
+                break;
+            }
+
+        break;
+
+        case SLB_MODEL_TITAN:
+        case SLB_MODEL_HERO:
+        case SLB_MODEL_EVO:
+        case SLB_MODEL_CREATIVE:
+
+            switch (value) {
+                case SLB_QC71_PROFILE_SILENT:
+                    status = slb_qc71_turbo_mode_set(0);
+                    status |= slb_qc71_silent_mode_set(1);
+                break;
+
+                case SLB_QC71_PROFILE_NORMAL:
+                    status = slb_qc71_turbo_mode_set(0);
+                    status |= slb_qc71_silent_mode_set(0);
+                break;
+
+                case SLB_QC71_PROFILE_PERFORMANCE:
+                    status = slb_qc71_silent_mode_set(0);
+                    status |= slb_qc71_turbo_mode_set(1);
+                break;
+            }
+
+        break;
+    }
+
+    return status;
+}

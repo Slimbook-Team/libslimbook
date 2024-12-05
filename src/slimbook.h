@@ -112,6 +112,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_MODULE_NOT_NEEDED           0x02
 #define SLB_MODULE_UNKNOWN              0x03
 
+#define SLB_QC71_PROFILE_UNKNOWN        0x00
+#define SLB_QC71_PROFILE_SILENT         0x01
+#define SLB_QC71_PROFILE_NORMAL         0x02
+#define SLB_QC71_PROFILE_ENERGY_SAVER   0x01
+#define SLB_QC71_PROFILE_BALANCED       0x02
+#define SLB_QC71_PROFILE_PERFORMANCE    0x03
+
 typedef struct {
     /* device size in bytes */
     uint64_t size;
@@ -247,3 +254,9 @@ extern "C" int slb_qc71_turbo_mode_get(uint32_t* value);
 
 /* Sets Turbo mode */
 extern "C" int slb_qc71_turbo_mode_set(uint32_t value);
+
+/* Gets profile */
+extern "C" int slb_qc71_profile_get(uint32_t* value);
+
+/* Sets profile */
+extern "C" int slb_qc71_profile_set(uint32_t value);
