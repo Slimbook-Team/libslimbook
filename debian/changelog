@@ -1,4 +1,4 @@
-libslimbook (1.17.0~bpo22.04.0) noble; urgency=medium
+libslimbook (1.17.0~bpo22.04.0) jammy; urgency=medium
 
   * Backport from noble
 
