@@ -302,8 +302,58 @@ string get_info()
         slb_qc71_super_lock_get(&value);
         sout<<"super key lock:"<<yesno[value]<<"\n";
         
-        slb_qc71_silent_mode_get(&value);
-        sout<<"silent mode:"<<yesno[value]<<"\n";
+        map<int,string> profile_gen_1 = {
+            {SLB_QC71_PROFILE_SILENT,"silent"},
+            {SLB_QC71_PROFILE_NORMAL,"normal"}
+        };
+
+        map<int,string> profile_gen_2 = {
+            {SLB_QC71_PROFILE_SILENT,"silent"},
+            {SLB_QC71_PROFILE_NORMAL,"normal"},
+            {SLB_QC71_PROFILE_PERFORMANCE,"performance"}
+        };
+
+        map<int,string> profile_gen_3 = {
+            {SLB_QC71_PROFILE_ENERGY_SAVER,"energy-saver"},
+            {SLB_QC71_PROFILE_BALANCED,"balanced"},
+            {SLB_QC71_PROFILE_PERFORMANCE,"performance"}
+        };
+
+        int status;
+        uint32_t profile = 0;
+        string profile_name = "unknown";
+
+        switch (slb_info_get_family()) {
+            case SLB_MODEL_PROX:
+            case SLB_MODEL_EXECUTIVE:
+                status = slb_qc71_profile_get(&profile);
+
+                if (status == 0) {
+                    profile_name = profile_gen_1[profile];
+                }
+            break;
+
+            case SLB_MODEL_TITAN:
+            case SLB_MODEL_HERO:
+                status = slb_qc71_profile_get(&profile);
+
+                if (status == 0) {
+                    profile_name = profile_gen_2[profile];
+                }
+            break;
+
+            case SLB_MODEL_EVO:
+            case SLB_MODEL_CREATIVE:
+                status = slb_qc71_profile_get(&profile);
+
+                if (status == 0) {
+                    profile_name = profile_gen_3[profile];
+                }
+            break;
+
+        }
+
+        sout<<"profile:"<<profile_name<<"\n";
     }
     
     sout<<std::flush;

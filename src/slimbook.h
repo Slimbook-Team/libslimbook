@@ -87,18 +87,17 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_PLATFORM_CLEVO              0x0200
 #define SLB_PLATFORM_Z16                0x0400
 #define SLB_PLATFORM_HMT16              0x0800
-#define SLB_PLATFORM_IDL              0x010000
-#define SLB_PLATFORM_IDA              0x020000
 
 #define SLB_MAX_PROCESSOR_VERSION  48
-
-#define SLB_SCAN_QC71_SUPER_LOCK        0x68
-#define SLB_SCAN_QC71_SILENT_MODE       0x69
-#define SLB_SCAN_QC71_TOUCHPAD_SWITCH   0x76
 
 #define SLB_SCAN_ENERGY_SAVER_MODE  0xf2
 #define SLB_SCAN_BALANCED_MODE      0xf9
 #define SLB_SCAN_PERFORMANCE_MODE   0xe2
+#define SLB_SCAN_TOUCHPAD_SWITCH    0x76
+
+#define SLB_SCAN_QC71_SUPER_LOCK        0x68
+#define SLB_SCAN_QC71_SILENT_MODE       0x69
+#define SLB_SCAN_QC71_TOUCHPAD_SWITCH   SLB_SCAN_TOUCHPAD_SWITCH
 
 #define SLB_SCAN_Z16_ENERGY_SAVER_MODE  SLB_SCAN_ENERGY_SAVER_MODE
 #define SLB_SCAN_Z16_BALANCED_MODE      SLB_SCAN_BALANCED_MODE
@@ -112,6 +111,13 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_MODULE_LOADED               0x01
 #define SLB_MODULE_NOT_NEEDED           0x02
 #define SLB_MODULE_UNKNOWN              0x03
+
+#define SLB_QC71_PROFILE_UNKNOWN        0x00
+#define SLB_QC71_PROFILE_SILENT         0x01
+#define SLB_QC71_PROFILE_NORMAL         0x02
+#define SLB_QC71_PROFILE_ENERGY_SAVER   0x01
+#define SLB_QC71_PROFILE_BALANCED       0x02
+#define SLB_QC71_PROFILE_PERFORMANCE    0x03
 
 typedef struct {
     /* device size in bytes */
@@ -248,3 +254,9 @@ extern "C" int slb_qc71_turbo_mode_get(uint32_t* value);
 
 /* Sets Turbo mode */
 extern "C" int slb_qc71_turbo_mode_set(uint32_t value);
+
+/* Gets profile */
+extern "C" int slb_qc71_profile_get(uint32_t* value);
+
+/* Sets profile */
+extern "C" int slb_qc71_profile_set(uint32_t value);

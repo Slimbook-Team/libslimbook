@@ -1,4 +1,4 @@
-project('libslimbook',['cpp'])
+project('libslimbook',['cpp'], default_options: ['cpp_std=c++17'])
 subdir('src')
 
 install_data('99-slimbook-settings.rules', install_dir:'lib/udev/rules.d/')
