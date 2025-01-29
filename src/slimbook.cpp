@@ -70,6 +70,7 @@ database_entry_t database [] = {
     {"SLIMBOOK", 0, "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ESSENTIAL_SLIMBOOK},
     {"ESSENTIAL", 0, "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ESSENTIAL_ESSENTIAL},
     {"Essential15L", 0, "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ESSENTIAL_15L},
+    {"ESSENTIAL-15-AMD", 0, "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ESSENTIAL_15_AMD_4700},
     {"ESS-15-AMD-5", 0, "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ESSENTIAL_15_AMD_5000},
     {"ESSENTIAL-15-11", 0, "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ESSENTIAL_15_11},
     {"ESSENTIAL-15-11 ", 0, "SLIMBOOK", SLB_PLATFORM_CLEVO, SLB_MODEL_ESSENTIAL_15_11},
@@ -309,7 +310,7 @@ int32_t slb_info_retrieve()
     }
     
     try {
-        read_device(SYSFS_DMI"serial", info_serial);
+        read_device(SYSFS_DMI"product_serial", info_serial);
     }
     catch (...) {
         info_serial = "<empty>";
