@@ -638,7 +638,7 @@ int slb_kbd_backlight_get(uint32_t model, uint32_t* color)
         return ENOENT;
     }
     
-    if (model == SLB_MODEL_HERO_RPL_RTX) {
+    if (model == SLB_MODEL_HERO_RPL_RTX or model == SLB_MODEL_CREATIVE_15_A8_RTX) {
         try {
             string svalue;
             uint32_t rgb;
@@ -702,7 +702,7 @@ int slb_kbd_backlight_set(uint32_t model, uint32_t color)
         return ENOENT;
     }
     
-    if (model == SLB_MODEL_HERO_RPL_RTX) {
+    if (model == SLB_MODEL_HERO_RPL_RTX or model == SLB_MODEL_CREATIVE_15_A8_RTX) {
         stringstream ss;
         try {
             uint32_t red = (color & 0x00ff0000) >> 16;
@@ -777,6 +777,14 @@ int slb_config_load(uint32_t model)
             slb_kbd_backlight_set(model,backlight);
         }
     }
+
+    if (module_loaded and model == SLB_MODEL_CREATIVE_15_A8_RTX) {
+        uint32_t backlight;
+
+        if (conf.find_u32("qc71.creative.backlight",backlight)) {
+            slb_kbd_backlight_set(model,backlight);
+        }
+    }
     
     if (module_loaded and ((model & SLB_MODEL_ELEMENTAL) > 0 or model == SLB_MODEL_HERO_S_TGL_RTX)) {
         uint32_t backlight;
@@ -816,6 +824,13 @@ int slb_config_store(uint32_t model)
 
             slb_kbd_backlight_get(model,&backlight);
             conf.set_u32("qc71.hero.backlight",backlight);
+        }
+
+        if (module_loaded and model == SLB_MODEL_CREATIVE_15_A8_RTX) {
+            uint32_t backlight = 0;
+
+            slb_kbd_backlight_get(model,&backlight);
+            conf.set_u32("qc71.creative.backlight",backlight);
         }
         
         if (module_loaded and ((model & SLB_MODEL_ELEMENTAL) > 0 or model == SLB_MODEL_HERO_S_TGL_RTX)) {
