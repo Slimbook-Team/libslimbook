@@ -1,3 +1,9 @@
+libslimbook (1.17.3) noble; urgency=medium
+
+  * Added evo 15 to the database
+
+ -- Slimbook <dev@slimbook.es>  Mon, 24 Feb 2025 15:57:40 +0100
+
 libslimbook (1.17.2) noble; urgency=medium
 
   * Added rgb backlight support for creative laptops
