@@ -68,6 +68,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #define SLB_MODEL_EVO                 0x010000
 #define SLB_MODEL_EVO_14_A8           0x010001
+#define SLB_MODEL_EVO_15_A8           0x010002
 
 #define SLB_MODEL_CREATIVE            0x020000
 #define SLB_MODEL_CREATIVE_15_A8_RTX  0x020001
