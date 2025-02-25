@@ -1,3 +1,9 @@
+libslimbook (1.17.4) noble; urgency=medium
+
+  * Added a function for getting AC power supply state
+
+ -- Slimbook <dev@slimbook.es>  Tue, 25 Feb 2025 21:24:23 +0100
+
 libslimbook (1.17.3) noble; urgency=medium
 
   * Added evo 15 to the database
