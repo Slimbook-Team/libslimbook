@@ -215,6 +215,10 @@ extern "C" const char* slb_info_module_device();
 /* Gets touchpad device path, or null if does not apply */
 extern "C" const char* slb_info_touchpad_device();
 
+/* Gets AC state, usually there is only one AC device so first argument 
+will be zero most of times. State value can be 0,1 or 2. See sysfs docs for details */
+extern "C" uint32_t slb_info_get_ac_state(int ac,int* state);
+
 /* Query DMI tables  */
 extern "C" int slb_smbios_get(slb_smbios_entry_t** entries,int* count);
 

@@ -230,6 +230,31 @@ string get_info()
         sout<<"boot mode: legacy\n";
     }
 
+    int ac_state;
+    
+    if (slb_info_get_ac_state(0, &ac_state) == 0) {
+        string ac_state_text;
+        
+        switch (ac_state) {
+            case 0:
+                ac_state_text = "Offline";
+            break;
+            
+            case 1:
+                ac_state_text = "Online";
+            break;
+            
+            case 2:
+                ac_state_text = "Online Programmable";
+            break;
+            
+            default:
+                ac_state_text = "unknown";
+        }
+        
+        sout<<"ac: "<<ac_state_text<<"\n";
+    }
+    
     sout<<"\n";
     
     sout<<"product:"<<slb_info_product_name()<<"\n";

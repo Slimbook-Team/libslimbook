@@ -626,6 +626,25 @@ const char* slb_info_touchpad_device()
     }
 }
 
+uint32_t slb_info_get_ac_state(int ac,int* state)
+{
+    stringstream ss;
+    
+    ss<<"/sys/class/power_supply/AC"<<ac<<"/online";
+    
+    try {
+        string value;
+        
+        read_device(ss.str(),value);
+        *state = std::stoi(value);
+    }
+    catch (...) {
+        return ENOENT;
+    }
+    
+    return 0;
+}
+
 int slb_kbd_backlight_get(uint32_t model, uint32_t* color)
 {
     if (color == nullptr) {
