@@ -68,6 +68,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #define SLB_MODEL_EVO                 0x010000
 #define SLB_MODEL_EVO_14_A8           0x010001
+#define SLB_MODEL_EVO_15_A8           0x010002
 
 #define SLB_MODEL_CREATIVE            0x020000
 #define SLB_MODEL_CREATIVE_15_A8_RTX  0x020001
@@ -213,6 +214,10 @@ extern "C" const char* slb_info_module_device();
 
 /* Gets touchpad device path, or null if does not apply */
 extern "C" const char* slb_info_touchpad_device();
+
+/* Gets AC state, usually there is only one AC device so first argument 
+will be zero most of times. State value can be 0,1 or 2. See sysfs docs for details */
+extern "C" uint32_t slb_info_get_ac_state(int ac,int* state);
 
 /* Query DMI tables  */
 extern "C" int slb_smbios_get(slb_smbios_entry_t** entries,int* count);
