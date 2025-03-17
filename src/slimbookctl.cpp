@@ -54,14 +54,24 @@ string generate_id()
     return ss.str();
 }
 
-static int run_command(vector<string>args)
+static int run_command(string file, vector<string>args)
 {
     pid_t pid = fork();
     
     if (pid == 0) {
-        //switching to root UID
-        setuid(0);
-        int status = execl(args[0].c_str(),args[1].c_str(),args[2].c_str(),(char *)0);
+        char* argv[10];
+        int n = 1;
+
+        argv[0] = (char*)file.c_str();
+
+        while(n < (int)args.size() +1){
+            argv[n] = (char*)args[n -1].c_str();n++;
+        }
+
+        argv[n] = nullptr;
+        
+        int status = execvp(argv[0], argv);
+
         if (status < 0) {
             exit(status);
         }
@@ -485,7 +495,7 @@ int main(int argc,char* argv[])
         for (const auto& entry : std::filesystem::directory_iterator("/usr/libexec/slimbook/report.d/")) {
             clog<<" running "<<entry.path().filename().string()<<" ";
             string output = tmp_name + entry.path().filename().string() + ".txt";
-            int status = run_command({entry.path(),entry.path().filename(),output});
+            int status = run_command(entry.path(),{output});
             
             if (status == 0) {
                 clog<<"✓"<<endl;
@@ -499,11 +509,17 @@ int main(int argc,char* argv[])
                 }
             }
         }
-        
-        run_command({"/usr/libexec/slimbook/report-pack","report-pack",tmp_name});
-        
-        string targz = "/tmp/slimbook-report-" + id + ".tar.gz"; 
-        cout<<"report "<<targz<<endl;
+
+        std::time_t now = std::time(NULL);
+        std::tm time = *std::localtime(&now);
+        stringstream stream;
+
+        stream << std::put_time(&time, "%F-%H-%M-%S");
+        string name = "slimbook-report-" + stream.str();
+
+        run_command("/usr/libexec/slimbook/report-pack", {tmp_name, name}); 
+
+        cout<<"report " << tmp_name << name << ".tar.gz" << endl; 
     }
     
     if (command == "show-dmi") {
