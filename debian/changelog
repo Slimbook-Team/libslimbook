@@ -1,3 +1,10 @@
+libslimbook (1.17.7) noble; urgency=medium
+
+  * Improved smbios support
+  * Some code clean up
+
+ -- Slimbook <dev@slimbook.es>  Sat, 29 Mar 2025 08:49:32 +0100
+
 libslimbook (1.17.6) noble; urgency=medium
 
   * Revamped report generation
