@@ -54,14 +54,24 @@ string generate_id()
     return ss.str();
 }
 
-static int run_command(vector<string>args)
+static int run_command(string file, vector<string>args)
 {
     pid_t pid = fork();
     
     if (pid == 0) {
-        //switching to root UID
-        setuid(0);
-        int status = execl(args[0].c_str(),args[1].c_str(),args[2].c_str(),(char *)0);
+        char* argv[10];
+        int n = 1;
+
+        argv[0] = (char*)file.c_str();
+
+        while(n < (int)args.size() +1){
+            argv[n] = (char*)args[n -1].c_str();n++;
+        }
+
+        argv[n] = nullptr;
+        
+        int status = execvp(argv[0], argv);
+
         if (status < 0) {
             exit(status);
         }
@@ -107,21 +117,21 @@ static string trim(string in)
 
 static string to_human(uint64_t value)
 {
-    string magnitude = "";
+    string magnitude = "B";
     double tmp = value;
     
     if (tmp > 1024) {
-        tmp = tmp / 1024;
+        tmp /= 1024;
         magnitude = "KB";
     }
     
     if (tmp > 1024) {
-        tmp = tmp / 1024;
+        tmp /= 1024;
         magnitude = "MB";
     }
     
     if (tmp > 1024) {
-        tmp = tmp / 1024;
+        tmp /= 1024;
         magnitude = "GB";
     }
     
@@ -199,7 +209,6 @@ string get_info()
     struct mntent* ent = getmntent(mfile);
     
     while(ent!=nullptr) {
-        string dev = ent->mnt_fsname;
         string dir = ent->mnt_dir;
         
         for (string& m : mounts) {
@@ -223,12 +232,8 @@ string get_info()
     }
     
     // boot mode
-    if (std::filesystem::exists("/sys/firmware/efi")) {
-        sout<<"boot mode: UEFI\n";
-    }
-    else {
-        sout<<"boot mode: legacy\n";
-    }
+
+    sout << (std::filesystem::exists("/sys/firmware/efi") ? "boot mode: UEFI\n" : "boot mode: legacy\n");
 
     int ac_state;
     
@@ -275,21 +280,19 @@ string get_info()
     slb_smbios_entry_t* entries = nullptr;
     int count = 0;
 
-    int status = slb_smbios_get(&entries,&count);
-    if (status == 0) {
+    if (slb_smbios_get(&entries,&count) == 0) {
         for (int n=0;n<count;n++) {
             if (entries[n].type == 4) {
                 string name = trim(entries[n].data.processor.version);
                 
-                // this may need another dmi var for a thread count bigger than 256
                 int count = entries[n].data.processor.threads;
-                
+                 
                 sout<<"cpu:"<<name<<" x "<<count<<endl;
             }
             
             if (entries[n].type == 17) {
                 if (entries[n].data.memory_device.type > 2) {
-                    sout<<"memory device:"<<entries[n].data.memory_device.size<<" MB "<<entries[n].data.memory_device.speed<<" MT/s"<<endl;
+                    sout<<"memory device:"<<entries[n].data.memory_device.size<< (entries[n].data.memory_device.size_unit == 0 ? " MB " : " KB ") << entries[n].data.memory_device.speed<<" MT/s"<<endl;
                 }
             }
         }
@@ -344,38 +347,29 @@ string get_info()
             {SLB_QC71_PROFILE_PERFORMANCE,"performance"}
         };
 
-        int status;
         uint32_t profile = 0;
         string profile_name = "unknown";
+        map<int, string> chosen_profile;
 
         switch (slb_info_get_family()) {
             case SLB_MODEL_PROX:
             case SLB_MODEL_EXECUTIVE:
-                status = slb_qc71_profile_get(&profile);
-
-                if (status == 0) {
-                    profile_name = profile_gen_1[profile];
-                }
+                chosen_profile = profile_gen_1;
             break;
 
             case SLB_MODEL_TITAN:
             case SLB_MODEL_HERO:
-                status = slb_qc71_profile_get(&profile);
-
-                if (status == 0) {
-                    profile_name = profile_gen_2[profile];
-                }
+                chosen_profile = profile_gen_2;
             break;
 
             case SLB_MODEL_EVO:
             case SLB_MODEL_CREATIVE:
-                status = slb_qc71_profile_get(&profile);
-
-                if (status == 0) {
-                    profile_name = profile_gen_3[profile];
-                }
+                chosen_profile = profile_gen_3;
             break;
+        }
 
+        if (slb_qc71_profile_get(&profile) == 0) {
+            profile_name = chosen_profile[profile];
         }
 
         sout<<"profile:"<<profile_name<<"\n";
@@ -485,7 +479,7 @@ int main(int argc,char* argv[])
         for (const auto& entry : std::filesystem::directory_iterator("/usr/libexec/slimbook/report.d/")) {
             clog<<" running "<<entry.path().filename().string()<<" ";
             string output = tmp_name + entry.path().filename().string() + ".txt";
-            int status = run_command({entry.path(),entry.path().filename(),output});
+            int status = run_command(entry.path(),{output});
             
             if (status == 0) {
                 clog<<"✓"<<endl;
@@ -499,11 +493,17 @@ int main(int argc,char* argv[])
                 }
             }
         }
-        
-        run_command({"/usr/libexec/slimbook/report-pack","report-pack",tmp_name});
-        
-        string targz = "/tmp/slimbook-report-" + id + ".tar.gz"; 
-        cout<<"report "<<targz<<endl;
+
+        std::time_t now = std::time(NULL);
+        std::tm time = *std::localtime(&now);
+        stringstream stream;
+
+        stream << std::put_time(&time, "%F-%H-%M-%S");
+        string name = "slimbook-report-" + stream.str();
+
+        run_command("/usr/libexec/slimbook/report-pack", {tmp_name, name}); 
+
+        cout<<"report " << tmp_name << name << ".tar.gz" << endl; 
     }
     
     if (command == "show-dmi") {

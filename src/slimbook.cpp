@@ -270,53 +270,27 @@ static uint32_t get_model_platform(uint32_t model)
     return SLB_PLATFORM_UNKNOWN;
 }
 
+static void _get_info_dev(string type, string* str){
+    try{
+        read_device(SYSFS_DMI + type, *str);
+    }
+    catch(...){
+        *str = "<empty>";
+    }
+}
+
 int32_t slb_info_retrieve()
 {
     if (info_cached) {
         return 0;
     }
-    
-    try {
-        read_device(SYSFS_DMI"product_name", info_product);
-    }
-    catch (...) {
-        info_product = "<empty>";
-    }
-    
-    try {
-        read_device(SYSFS_DMI"product_sku", info_sku);
-    }
-    catch (...) {
-        info_sku = "<empty>";
-    }
-    
-    try {
-        read_device(SYSFS_DMI"board_vendor", info_vendor);
-    }
-    catch (...) {
-        info_vendor = "<empty>";
-    }
-    
-    try {
-        read_device(SYSFS_DMI"bios_version", info_bios_version);
-    }
-    catch (...) {
-        info_bios_version = "<empty>";
-    }
-    
-    try {
-        read_device(SYSFS_DMI"ec_firmware_release", info_ec_firmware_release);
-    }
-    catch (...) {
-        info_ec_firmware_release = "<empty>";
-    }
-    
-    try {
-        read_device(SYSFS_DMI"product_serial", info_serial);
-    }
-    catch (...) {
-        info_serial = "<empty>";
-    }
+
+    _get_info_dev("product_name", &info_product);
+    _get_info_dev("product_sku", &info_sku);
+    _get_info_dev("board_vendor", &info_vendor);
+    _get_info_dev("bios_version", &info_bios_version);
+    _get_info_dev("ec_firmware_release", &info_ec_firmware_release);
+    _get_info_dev("product_serial", &info_serial);
     
     string pretty_product = pretty_string(info_product);
     string pretty_vendor = pretty_string(info_vendor);

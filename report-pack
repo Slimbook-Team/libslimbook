@@ -1,6 +1,4 @@
 #!/bin/sh
+PKG="$1$2.tar.gz"
 
-DIR=`dirname $1`
-NAME=`basename $1`
-PKG="$DIR/$NAME.tar.gz"
-tar -C $DIR -zcvf $PKG $NAME >/dev/null
+tar -C $1 --exclude=$PKG -zcvf $PKG -P $1 > /dev/null 2>&1

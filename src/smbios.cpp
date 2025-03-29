@@ -78,8 +78,8 @@ int slb_smbios_get(slb_smbios_entry_t** entries,int* count)
             } while (true);
 
             if (entry.type == 4) {
-                entry.data.processor.cores = raw[0x23];
-                entry.data.processor.threads = raw[0x25];
+                entry.data.processor.cores = raw[0x23] == 0xFF ? *((uint16_t*)(&raw[0x23])) : raw[0x2A];
+                entry.data.processor.threads = raw[0x25] == 0xFF ? *((uint16_t*)(&raw[0x2E])) : raw[0x25];
                 string name = strings[raw[0x10]-1];
                 strncpy(entry.data.processor.version,name.c_str(),SLB_MAX_PROCESSOR_VERSION - 1);
                 //ensure string is 0 ended
@@ -88,8 +88,9 @@ int slb_smbios_get(slb_smbios_entry_t** entries,int* count)
 
             if (entry.type == 17) {
 
-                entry.data.memory_device.size = *((uint16_t*)(&raw[0x0c]));
-                entry.data.memory_device.speed = *((uint16_t*)(&raw[0x15]));
+                entry.data.memory_device.size = *((uint16_t*)(&raw[0x0C])) == 0x7FFF ?  *((uint32_t*)(&raw[0x1C])) : *((uint16_t*)(&raw[0x0C])) & 0x7FFF;
+                entry.data.memory_device.size_unit = *((uint16_t*)(&raw[0x0C])) == 0x7FFF ? 0 : (*((uint16_t*)(&raw[0x0C])) & 0x8000) != 0;
+                entry.data.memory_device.speed = *((uint16_t*)(&raw[0x15])) == 0xFFFF ? *((uint32_t*)(&raw[0x54])) : *((uint16_t*)(&raw[0x15]));
                 entry.data.memory_device.type = raw[0x12];
             }
 

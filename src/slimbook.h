@@ -124,6 +124,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 typedef struct {
     /* device size in bytes */
     uint64_t size;
+    
+    /* device size unit : 0 MB, 1 KB */
+    uint8_t size_unit : 1;
 
     /* device speed in MT/s */
     uint32_t speed;
@@ -133,8 +136,8 @@ typedef struct {
 } slb_smbios_memory_device_t;
 
 typedef struct {
-    uint8_t cores;
-    uint8_t threads;
+    uint16_t cores;
+    uint16_t threads;
     char version[SLB_MAX_PROCESSOR_VERSION];
 } slb_smbios_processor_t;
 
