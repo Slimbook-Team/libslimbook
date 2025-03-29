@@ -1,3 +1,9 @@
+libslimbook (1.17.7~bpo22.04.0) jammy; urgency=medium
+
+  * Jammy backport
+
+ -- Slimbook <dev@slimbook.es>  Sat, 29 Mar 2025 09:12:23 +0100
+
 libslimbook (1.17.4~bpo22.04.0) jammy; urgency=medium
 
   * Jammy backport
