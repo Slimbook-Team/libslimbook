@@ -1,3 +1,10 @@
+libslimbook (1.17.8) noble; urgency=medium
+
+  * Fixed bug introduced in last patch series, not running scripts as uid 0
+  * Fixed dnf report script
+
+ -- Slimbook <dev@slimbook.es>  Fri, 11 Apr 2025 22:43:43 +0200
+
 libslimbook (1.17.7) noble; urgency=medium
 
   * Improved smbios support
