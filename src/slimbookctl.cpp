@@ -19,6 +19,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
 #include "slimbook.h"
+#include "common.h"
 
 #include <sys/statvfs.h>
 #include <sys/types.h>
@@ -37,6 +38,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <cstdlib>
 #include <ctime>
 #include <sstream>
+#include <regex>
+#include <string.h>
 
 #define SLB_REPORT_PRIVATE "SLB_REPORT_PRIVATE"
 
@@ -69,7 +72,8 @@ static int run_command(string file, vector<string>args)
         }
 
         argv[n] = nullptr;
-        
+        //switching to root UID
+        setuid(0);
         int status = execvp(argv[0], argv);
 
         if (status < 0) {
@@ -276,6 +280,8 @@ string get_info()
     else {
         sout<<"serial:"<<slb_info_product_serial()<<"\n";
     }
+
+    sout<<"\n";
     
     slb_smbios_entry_t* entries = nullptr;
     int count = 0;
@@ -299,13 +305,101 @@ string get_info()
         
         slb_smbios_free(entries);
     }
-    
+
+    vector<string> modules = get_modules();
+    bool modFound = false;
+
+    for (string mod : modules) {
+        modFound = mod == "amdgpu" ? true : false;
+
+        if(modFound){
+            break;
+        }
+    }
+
+    if(modFound){
+        #define SYS_AMDGPU "/sys/class/drm/card%d/device/"
+        string vram_val = "1";
+        char buf[sizeof(SYS_AMDGPU)];
+
+        for(int i = 0; i < 8; i++){
+            snprintf(buf, sizeof(buf), SYS_AMDGPU, i);
+            if(filesystem::exists(buf)){
+                break;
+            }
+        }
+
+        read_device(string(buf) + "mem_info_vram_total", vram_val);
+
+        sout << "UMA Framebuffer: " << to_human(stoull(vram_val)) << endl;
+    }
+
     sout<<"\n";
+
+    slb_sys_battery_info bat = {0};
+
+    if(slb_battery_info_get(&bat) == 0){
+        string stat;
+
+        switch(bat.status){
+            case 0:
+                stat = "Unknown";
+                break;
+            case 1:
+                stat = "Charging";
+                break;            
+            case 2:
+                stat = "Discharging";
+                break;            
+            case 3:
+                stat = "Not charging";
+                break;
+            case 4:
+                stat = "Full";
+                break;
+            default:
+                stat = "Unknown";
+        }
+
+        uint32_t charge = bat.charge;
+
+        sout << "battery info: " << (int)(bat.capacity) << "% " << stat + " " << charge << " mAh" << endl;
+    }
     
+    int module_status = slb_info_is_module_loaded();
+    uint32_t platform = slb_info_get_platform();
+
+    bool module_loaded = module_status == SLB_MODULE_LOADED;
+    
+    if(module_loaded){
+        switch(platform){
+            case SLB_PLATFORM_QC71:
+                uint32_t fan1,fan2;
+
+                slb_qc71_primary_fan_get(&fan1);
+                slb_qc71_secondary_fan_get(&fan2);
+
+                sout << "primary fan speed: " << fan1 << " RPM" << endl;
+                sout << "secondary fan speed: " << fan2 << " RPM" << endl; 
+
+                break;
+
+            case SLB_PLATFORM_CLEVO:
+                //todo
+                break;
+        
+            default:
+                break;
+        }
+    }
+
+    
+
+    sout<<"\n";
+
     uint32_t model = slb_info_get_model();
     sout<<"model:0x"<<std::hex<<model<<"\n";
     
-    uint32_t platform = slb_info_get_platform();
     sout<<"platform:0x"<<platform<<"\n";
     
     sout<<"family:"<<slb_info_get_family_name()<<"\n";
@@ -316,12 +410,11 @@ string get_info()
         sout<<"confidence:"<<std::dec<<confidence<<"\n";
     }
     
-    int module_status = slb_info_is_module_loaded();
     sout<<"module loaded:"<<module_status_string[module_status]<<"\n";
     
     sout<<"\n";
     
-    if (module_status == SLB_MODULE_LOADED and platform == SLB_PLATFORM_QC71) {
+    if (module_loaded and platform == SLB_PLATFORM_QC71) {
         uint32_t value = 0;
         
         slb_qc71_fn_lock_get(&value);

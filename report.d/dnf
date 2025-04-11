@@ -2,7 +2,7 @@
 
 if [ -f /usr/bin/dnf ]
 then
-    dnf list installed > $1
+    dnf list --installed > $1
 else
     exit 200
 fi

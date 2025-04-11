@@ -20,6 +20,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "slimbook.h"
 #include "configuration.h"
+#include "common.h"
 
 #include <sys/sysinfo.h>
 
@@ -31,6 +32,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <sstream>
 #include <iomanip>
 #include <iostream>
+#include <filesystem>
 
 using namespace std;
 
@@ -213,46 +215,6 @@ static string pretty_string(string src)
     }
     
     return out;
-}
-
-static void read_device(string path,string& out)
-{
-    ifstream file;
-
-    file.open(path.c_str());
-    std::getline(file,out);
-    file.close();
-}
-
-static void write_device(string path,string in)
-{
-    ofstream file;
-
-    file.open(path.c_str());
-    file<<in;
-    file.close();
-}
-
-static vector<string> get_modules()
-{
-    vector<string> modules;
-    
-    ifstream file;
-    
-    file.open("/proc/modules");
-    
-    while (file.good()) {
-        string module_name;
-        string tmp;
-        
-        file>>module_name;
-        std::getline(file,tmp);
-        modules.push_back(module_name);
-    }
-    
-    file.close();
-    
-    return modules;
 }
 
 static uint32_t get_model_platform(uint32_t model)
@@ -902,6 +864,89 @@ int slb_qc71_super_lock_set(uint32_t value)
         stringstream ss;
         ss<<value;
         write_device(SYSFS_QC71"super_key_lock",ss.str());
+    }
+    catch (...) {
+        return EIO;
+    }
+
+    return SLB_SUCCESS;
+}
+
+#define QC71_HWMON SYSFS_QC71"hwmon/"
+
+static int _slb_qc71_fan_get_common(string fan, uint32_t* value){
+    string spath;
+
+    find_file(QC71_HWMON, fan, spath);
+
+    if (value == nullptr ) {
+        return EINVAL;
+    }
+    
+    try {
+        if(spath.size() == 0){
+            *value = -1;
+        }
+        else{
+            string svalue;
+
+            read_device(spath+fan,svalue);
+            *value = std::stoi(svalue,0,10);
+        }
+    }
+    catch (...) {
+        return EIO;
+    }
+    
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_primary_fan_get(uint32_t* value){
+    return _slb_qc71_fan_get_common("fan1_input", value);
+}
+
+int slb_qc71_secondary_fan_get(uint32_t* value){
+    return _slb_qc71_fan_get_common("fan2_input", value);
+
+}
+
+#define SYS_PWS "/sys/class/power_supply/"
+
+int slb_battery_info_get(slb_sys_battery_info* info){
+    if(info == nullptr){
+        return EINVAL;
+    }
+
+    if(!filesystem::exists(SYS_PWS"/BAT0/")){
+        return ENOENT;
+    }
+    
+    try {
+        string svalue;
+
+        read_device(SYS_PWS"/BAT0/capacity",svalue);
+        info->capacity = std::stoi(svalue,0,10);
+
+        read_device(SYS_PWS"/BAT0/charge_now", svalue);
+        info->charge = (std::stoi(svalue,0,10) / 100);
+        
+        read_device(SYS_PWS"/BAT0/status",svalue);
+
+        if(strcmp(svalue.c_str(), "Charging") == 0){
+            info->status = 1;
+        }
+        else if(strcmp(svalue.c_str(), "Discharging") == 0){
+            info->status = 2;
+        }
+        else if(strcmp(svalue.c_str(), "Not charging") == 0){
+            info->status = 3;
+        }
+        else if(strcmp(svalue.c_str(), "Full") == 0){
+            info->status = 4;
+        }
+        else {
+            info->status = 0;
+        }
     }
     catch (...) {
         return EIO;
