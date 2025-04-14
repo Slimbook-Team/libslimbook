@@ -152,6 +152,16 @@ typedef struct {
     } data;
 } slb_smbios_entry_t;
 
+typedef struct {
+    /* battery capacity */
+    uint8_t capacity;
+    /* battery charge */
+    uint32_t charge;
+    /*  battery status : 0 Unknown, 1 Charging, 2 Discharging, 3 Not charging, 4 Full */
+    uint8_t status : 3;
+} slb_sys_battery_info;
+
+
 /* Retrieves DMI info and cache it. No need to call this function */
 extern "C" int32_t slb_info_retrieve();
 
@@ -251,6 +261,15 @@ extern "C" int slb_qc71_super_lock_get(uint32_t* value);
 
 /* Gets Super lock status */
 extern "C" int slb_qc71_super_lock_set(uint32_t value);
+
+/* Gets RPM for primary fan */
+extern "C" int slb_qc71_primary_fan_get(uint32_t* value);
+
+/* Gets RPM for secondary fan */
+extern "C" int slb_qc71_secondary_fan_get(uint32_t* value);
+
+/* Gets battery info */
+extern "C" int slb_battery_info_get(slb_sys_battery_info* info);
 
 /* Gets Silent mode status */
 extern "C" int slb_qc71_silent_mode_get(uint32_t* value);
