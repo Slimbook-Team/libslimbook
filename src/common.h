@@ -23,6 +23,11 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include <string>
 #include <vector>
+#include <cstdint>
+
+#define ALIGN(data, alignto) ((data) & ~((alignto)-1))
+
+#define cpuid(level, regs) do{ __cpuid((level), (regs)[0],(regs)[1],(regs)[2],(regs)[3]); }while(0)
 
 /* Tries to find file recursively in path */
 bool find_file(std::string path, std::string file, std::string& out);
@@ -35,5 +40,14 @@ void write_device(std::string in, std::string out);
 
 /* Retrieves all modules loaded */
 std::vector<std::string> get_modules(void);
+
+/* Swaps 16 bit data for endianness */
+uint16_t swap16(uint16_t data);
+
+/* Swaps 32 bit data for endianness */
+uint32_t swap32(uint32_t data);
+
+/* Retrieves endianness 0 LE 1 BE */
+int32_t check_endianness(void);
 
 #endif

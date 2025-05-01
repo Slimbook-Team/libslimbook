@@ -78,3 +78,20 @@ vector<string> get_modules()
     
     return modules;
 }
+
+uint16_t swap16(uint16_t data){
+    return (data << 8)|((data >> 8) & 0xFF);
+}
+
+uint32_t swap32(uint32_t data){
+    return ((data & 0xFF000000) >> 24) | ((data & 0x00FF0000) >> 8) | 
+    ((data & 0x0000FF00) << 8) | ((data & 0x000000FF) << 24);
+}
+
+/* 0 LE 1 BE*/
+int32_t check_endianness(void){
+    uint32_t magic = 0xCAFEBEEF;
+    char* val = (char*)&magic;
+
+    return *val == 0xEF;
+}

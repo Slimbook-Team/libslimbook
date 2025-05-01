@@ -121,6 +121,16 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_QC71_PROFILE_BALANCED       0x02
 #define SLB_QC71_PROFILE_PERFORMANCE    0x03
 
+#define SLB_TDP_TYPE_UNKNOWN            0x00
+#define SLB_TDP_TYPE_INTEL              0x01
+#define SLB_TDP_TYPE_AMD                0x02
+
+#define SLB_BAT_STATE_UNKNOWN           0x00
+#define SLB_BAT_STATE_CHARGING          0x01
+#define SLB_BAT_STATE_DISCHARGING       0x02
+#define SLB_BAT_STATE_NOT_CHARGING      0x03
+#define SLB_BAT_STATE_FULL              0x04
+
 typedef struct {
     /* device size in bytes */
     uint64_t size;
@@ -161,6 +171,14 @@ typedef struct {
     uint8_t status : 3;
 } slb_sys_battery_info;
 
+typedef struct {
+    uint8_t slow;
+    uint8_t fast;
+    uint8_t sustained;
+
+    /* AMD mentions 3 types of TDP while Intel only shows max, 0 Intel, 1 AMD */
+    uint8_t type : 2;
+} slb_tdp_info_t;
 
 /* Retrieves DMI info and cache it. No need to call this function */
 extern "C" int32_t slb_info_retrieve();
@@ -218,6 +236,9 @@ extern "C" uint64_t slb_info_total_memory();
 
 /* Gets available system memory (not used by any process or buffer) */
 extern "C" uint64_t slb_info_available_memory();
+
+/* Gets current TDP */
+extern "C" slb_tdp_info_t slb_info_get_tdp_info();
 
 /* Gets keyboard device path, or null if does not apply */
 extern "C" const char* slb_info_keyboard_device();
