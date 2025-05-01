@@ -1,3 +1,9 @@
+libslimbook (1.18.0) noble; urgency=medium
+
+  * Added support for TDP query
+
+ -- Slimbook <dev@slimbook.es>  Thu, 01 May 2025 17:09:19 +0200
+
 libslimbook (1.17.8) noble; urgency=medium
 
   * Fixed bug introduced in last patch series, not running scripts as uid 0
