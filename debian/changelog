@@ -1,3 +1,9 @@
+libslimbook (1.18.1) noble; urgency=medium
+
+  * Do not crash when there is no access to /dev/mem for TDP query
+
+ -- Slimbook <dev@slimbook.es>  Thu, 08 May 2025 19:07:01 +0200
+
 libslimbook (1.18.0) noble; urgency=medium
 
   * Added support for TDP query
