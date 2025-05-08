@@ -288,7 +288,6 @@ string get_info()
 
                     case SLB_TDP_TYPE_UNKNOWN:
                         /* do nothing */
-                        cerr<<"Failed to fetch TDP"<<endl;
                     default:
                         break;
                 }

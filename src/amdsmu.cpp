@@ -228,9 +228,10 @@ int _map_dev_addr(uintptr_t addr){
 
     if(dev_fd > 0){
         phys_map = mmap(NULL, 4096, PROT_READ, MAP_SHARED, dev_fd, addr);
+        int map_errno = errno;
         close(dev_fd);
 
-        return 0;
+        return map_errno;
     }
 
     return dev_errno;
