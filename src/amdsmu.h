@@ -77,7 +77,7 @@ uint32_t _smu_amd_send_req(smu_amd* smu, uint32_t msg, uint32_t* args);
 void** get_phys_map();
 
 /* Maps internal physical map to addr */
-void _map_dev_addr(uintptr_t addr);
+int _map_dev_addr(uintptr_t addr);
 
 /* Frees internal physical map */
 void _free_map_dev();

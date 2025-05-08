@@ -521,13 +521,14 @@ uint64_t slb_info_available_memory()
 slb_tdp_info_t _get_TDP_intel()
 {
     #define INTEL_RAPL_PATH "/sys/class/powercap/intel-rapl/intel-rapl:0/"
-    slb_tdp_info_t tdp = {0,0,0, .type = SLB_TDP_TYPE_INTEL};
+    slb_tdp_info_t tdp = {0};
 
     if(filesystem::exists(INTEL_RAPL_PATH)){
         string svalue;
         read_device(INTEL_RAPL_PATH"constraint_0_power_limit_uw", svalue);
 
         tdp.sustained = atoll(svalue.c_str()) / 1000000;
+        tdp.type = SLB_TDP_TYPE_INTEL;
     }
     
     return tdp;
@@ -536,7 +537,7 @@ slb_tdp_info_t _get_TDP_intel()
 /* Gets TDP from smu driver in PCI */
 slb_tdp_info_t _get_TDP_amd()
 {
-    slb_tdp_info_t tdp = {0,0,0, .type = SLB_TDP_TYPE_AMD};
+    slb_tdp_info_t tdp = {0};
 
     uint32_t cpuregs[4];
     uint32_t smuargs[2] = {0};
@@ -547,7 +548,7 @@ slb_tdp_info_t _get_TDP_amd()
 
     uintptr_t addr = -1;
 
-    smu_amd* smu = NULL;
+    smu_amd* smu = nullptr;
 
     void** phys_addr = get_phys_map();
 
@@ -564,7 +565,9 @@ slb_tdp_info_t _get_TDP_amd()
     }
 
     if(addr != (uint64_t)-1){
-        _map_dev_addr(addr); 
+        if(_map_dev_addr(addr)){
+            return tdp;
+        } 
         _refresh_table(design, &smu, smuargs);
 
         #define get_prop_from_offs(addr, offs) ((uint8_t)(*(float*)((uintptr_t)*(addr) + (offs))))
@@ -577,6 +580,8 @@ slb_tdp_info_t _get_TDP_amd()
     pci_cleanup(smu->dev);
     _clear_smu_amd(smu);
     _free_map_dev();
+
+    tdp.type = SLB_TDP_TYPE_AMD;
 
     return tdp;
 }

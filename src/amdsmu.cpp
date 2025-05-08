@@ -222,13 +222,18 @@ void** get_phys_map(){
     return &phys_map;
 }
 
-void _map_dev_addr(uintptr_t addr){
+int _map_dev_addr(uintptr_t addr){
     int dev_fd = open("/dev/mem", O_RDONLY);
+    int dev_errno = errno;
 
     if(dev_fd > 0){
         phys_map = mmap(NULL, 4096, PROT_READ, MAP_SHARED, dev_fd, addr);
         close(dev_fd);
+
+        return 0;
     }
+
+    return dev_errno;
 }
 
 void _free_map_dev(){

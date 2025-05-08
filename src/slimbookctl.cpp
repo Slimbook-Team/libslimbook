@@ -286,10 +286,13 @@ string get_info()
                         sout << "TDP fast limit (ppt-l): " << (int)tdp.fast << " W\n";
                         break;
 
+                    case SLB_TDP_TYPE_UNKNOWN:
+                        /* do nothing */
+                        cerr<<"Failed to fetch TDP"<<endl;
                     default:
                         break;
                 }
-                
+
                 sout << "\n";
             }
 
