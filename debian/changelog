@@ -1,3 +1,9 @@
+libslimbook (1.18.2) noble; urgency=medium
+
+  * Fixed a crash (again) accessing /dev/mem
+
+ -- slimbook <dev@slimbook.es>  Thu, 08 May 2025 22:34:04 +0200
+
 libslimbook (1.18.1) noble; urgency=medium
 
   * Do not crash when there is no access to /dev/mem for TDP query
