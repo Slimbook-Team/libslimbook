@@ -317,20 +317,21 @@ string get_info()
     }
 
     if(modFound){
-        
         string vram_val = "1";
-        char buf[sizeof(SYS_AMDGPU)];
+        char buf[55];
         
         for(int i = 0; i < 8; i++){
-            snprintf(buf, sizeof(buf), SYS_AMDGPU, i);
+            snprintf(buf, sizeof(buf), SYS_AMDGPU"mem_info_vram_total", i);
             if(filesystem::exists(buf)){
                 break;
             }
         }
 
-        read_device(string(buf) + "mem_info_vram_total", vram_val);
+        read_device(string(buf), vram_val);
 
-        sout << "UMA Framebuffer: " << to_human(stoull(vram_val)) << "\n";
+        if(vram_val != "1"){
+            sout << "UMA Framebuffer: " << to_human(stoull(vram_val)) << "\n";
+        }
     }
 
     sout<<"\n";

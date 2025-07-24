@@ -30,6 +30,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_MODEL_EXECUTIVE_11TH        0x0101
 #define SLB_MODEL_EXECUTIVE_12TH        0x0102
 #define SLB_MODEL_EXECUTIVE_13TH        0x0103
+#define SLB_MODEL_EXECUTIVE_UC2         0x0104
 
 #define SLB_MODEL_PROX                  0x0200
 #define SLB_MODEL_PROX_AMD              0x0201
@@ -62,6 +63,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_MODEL_EXCALIBUR_16_AMD7     0x4002
 #define SLB_MODEL_EXCALIBUR_16_AMD8     0x4003
 #define SLB_MODEL_EXCALIBUR_16R_AMD8    0x4004
+#define SLB_MODEL_EXCALIBUR_AMD_AI      0x4005
 
 #define SLB_MODEL_HERO_S                0x8000
 #define SLB_MODEL_HERO_S_TGL_RTX        0x8001
@@ -69,6 +71,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_MODEL_EVO                 0x010000
 #define SLB_MODEL_EVO_14_A8           0x010001
 #define SLB_MODEL_EVO_15_A8           0x010002
+#define SLB_MODEL_EVO_14_AI9_STP      0x010003
+#define SLB_MODEL_EVO_15_AI9_STP      0x010004
 
 #define SLB_MODEL_CREATIVE            0x020000
 #define SLB_MODEL_CREATIVE_15_A8_RTX  0x020001
