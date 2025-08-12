@@ -275,6 +275,12 @@ extern "C" int slb_config_load(uint32_t model);
 /* Stores configuration from driver to disk */
 extern "C" int slb_config_store(uint32_t model);
 
+/* Gets Manual control status */
+extern "C" int slb_qc71_manual_control_get(uint32_t* value);
+
+/* Sets Manual control */
+extern "C" int slb_qc71_manual_control_set(uint32_t value);
+
 /* Gets Fn lock status */
 extern "C" int slb_qc71_fn_lock_get(uint32_t* value);
 

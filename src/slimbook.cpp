@@ -927,6 +927,38 @@ int slb_config_store(uint32_t model)
     return 0;
 }
 
+int slb_qc71_manual_control_get(uint32_t* value)
+{
+    if (value == nullptr) {
+        return EINVAL;
+    }
+    
+    try {
+        string svalue;
+        read_device(SYSFS_QC71"manual_control",svalue);
+        *value = std::stoi(svalue,0,10);
+    }
+    catch (...) {
+        return EIO;
+    }
+    
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_manual_control_set(uint32_t value)
+{
+    try {
+        stringstream ss;
+        ss<<value;
+        write_device(SYSFS_QC71"manual_control",ss.str());
+    }
+    catch (...) {
+        return EIO;
+    }
+    
+    return SLB_SUCCESS;
+}
+
 int slb_qc71_fn_lock_get(uint32_t* value)
 {
     if (value == nullptr) {
