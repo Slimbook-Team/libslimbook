@@ -1,3 +1,9 @@
+libslimbook (1.18.4) noble; urgency=medium
+
+  * Added an api for qc71 manual_control
+
+ -- slimbook <dev@slimbook.es>  Tue, 12 Aug 2025 19:12:31 +0200
+
 libslimbook (1.18.3) noble; urgency=medium
 
   * Added new models to database
