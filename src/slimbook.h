@@ -30,6 +30,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_MODEL_EXECUTIVE_11TH        0x0101
 #define SLB_MODEL_EXECUTIVE_12TH        0x0102
 #define SLB_MODEL_EXECUTIVE_13TH        0x0103
+#define SLB_MODEL_EXECUTIVE_UC2         0x0104
 
 #define SLB_MODEL_PROX                  0x0200
 #define SLB_MODEL_PROX_AMD              0x0201
@@ -62,6 +63,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_MODEL_EXCALIBUR_16_AMD7     0x4002
 #define SLB_MODEL_EXCALIBUR_16_AMD8     0x4003
 #define SLB_MODEL_EXCALIBUR_16R_AMD8    0x4004
+#define SLB_MODEL_EXCALIBUR_AMD_AI      0x4005
 
 #define SLB_MODEL_HERO_S                0x8000
 #define SLB_MODEL_HERO_S_TGL_RTX        0x8001
@@ -69,6 +71,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_MODEL_EVO                 0x010000
 #define SLB_MODEL_EVO_14_A8           0x010001
 #define SLB_MODEL_EVO_15_A8           0x010002
+#define SLB_MODEL_EVO_14_AI9_STP      0x010003
+#define SLB_MODEL_EVO_15_AI9_STP      0x010004
 
 #define SLB_MODEL_CREATIVE            0x020000
 #define SLB_MODEL_CREATIVE_15_A8_RTX  0x020001
@@ -121,6 +125,16 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_QC71_PROFILE_BALANCED       0x02
 #define SLB_QC71_PROFILE_PERFORMANCE    0x03
 
+#define SLB_TDP_TYPE_UNKNOWN            0x00
+#define SLB_TDP_TYPE_INTEL              0x01
+#define SLB_TDP_TYPE_AMD                0x02
+
+#define SLB_BAT_STATE_UNKNOWN           0x00
+#define SLB_BAT_STATE_CHARGING          0x01
+#define SLB_BAT_STATE_DISCHARGING       0x02
+#define SLB_BAT_STATE_NOT_CHARGING      0x03
+#define SLB_BAT_STATE_FULL              0x04
+
 typedef struct {
     /* device size in bytes */
     uint64_t size;
@@ -161,6 +175,14 @@ typedef struct {
     uint8_t status : 3;
 } slb_sys_battery_info;
 
+typedef struct {
+    uint8_t slow;
+    uint8_t fast;
+    uint8_t sustained;
+
+    /* AMD mentions 3 types of TDP while Intel only shows max, 0 Intel, 1 AMD */
+    uint8_t type : 2;
+} slb_tdp_info_t;
 
 /* Retrieves DMI info and cache it. No need to call this function */
 extern "C" int32_t slb_info_retrieve();
@@ -219,6 +241,9 @@ extern "C" uint64_t slb_info_total_memory();
 /* Gets available system memory (not used by any process or buffer) */
 extern "C" uint64_t slb_info_available_memory();
 
+/* Gets current TDP */
+extern "C" slb_tdp_info_t slb_info_get_tdp_info();
+
 /* Gets keyboard device path, or null if does not apply */
 extern "C" const char* slb_info_keyboard_device();
 
@@ -249,6 +274,12 @@ extern "C" int slb_config_load(uint32_t model);
 
 /* Stores configuration from driver to disk */
 extern "C" int slb_config_store(uint32_t model);
+
+/* Gets Manual control status */
+extern "C" int slb_qc71_manual_control_get(uint32_t* value);
+
+/* Sets Manual control */
+extern "C" int slb_qc71_manual_control_set(uint32_t value);
 
 /* Gets Fn lock status */
 extern "C" int slb_qc71_fn_lock_get(uint32_t* value);

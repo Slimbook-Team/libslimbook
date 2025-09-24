@@ -21,7 +21,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "slimbook.h"
 #include "configuration.h"
 #include "common.h"
+#include "amdsmu.h"
+#include "pci.h"
 
+#include <cpuid.h>
 #include <sys/sysinfo.h>
 
 #include <string>
@@ -65,6 +68,7 @@ database_entry_t database [] = {
     {"Executive", "Executive-RPL", "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_EXECUTIVE_13TH},
     {"Executive", "0001", "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_EXECUTIVE_12TH},
     {"EXECUTIVE-14", 0, "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_EXECUTIVE_11TH},
+    {"Executive-14-UC2", 0, "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_EXECUTIVE_UC2},
 
     {"TITAN", 0, "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_TITAN},
     {"HERO-RPL-RTX", 0, "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_HERO_RPL_RTX},
@@ -90,9 +94,12 @@ database_entry_t database [] = {
     {"EXCALIBUR-16-AMD7", 0, "SLIMBOOK", SLB_PLATFORM_Z16, SLB_MODEL_EXCALIBUR_16_AMD7},
     {"EXCALIBUR-16-AMD8", 0, "SLIMBOOK", SLB_PLATFORM_Z16, SLB_MODEL_EXCALIBUR_16_AMD8},
     {"EXCALIBUR-16R-AMD8", 0, "SLIMBOOK", SLB_PLATFORM_HMT16, SLB_MODEL_EXCALIBUR_16R_AMD8},
+    {"EXCALIBUR-AMD-AI", 0, "SLIMBOOK", SLB_PLATFORM_HMT16, SLB_MODEL_EXCALIBUR_AMD_AI},
 
     {"EVO14-A8", 0, "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_EVO_14_A8},
     {"EVO15-A8", 0, "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_EVO_15_A8},
+    {"EVO14-AI9-STP", 0, "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_EVO_14_AI9_STP},
+    {"EVO15-AI9-STP", 0, "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_EVO_15_AI9_STP},
 
     {"CREA15-A8-RTX", 0, "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_CREATIVE_15_A8_RTX},
 
@@ -514,6 +521,118 @@ uint64_t slb_info_available_memory()
 
 }
 
+/* Gets TDP from Zone 0 in CPU */
+slb_tdp_info_t _get_TDP_intel()
+{
+    #define INTEL_RAPL_PATH "/sys/class/powercap/intel-rapl/intel-rapl:0/"
+    slb_tdp_info_t tdp = {0};
+
+    if(filesystem::exists(INTEL_RAPL_PATH)){
+        string svalue;
+        read_device(INTEL_RAPL_PATH"constraint_0_power_limit_uw", svalue);
+
+        tdp.sustained = atoll(svalue.c_str()) / 1000000;
+        tdp.type = SLB_TDP_TYPE_INTEL;
+    }
+    
+    return tdp;
+};
+
+/* Gets TDP from smu driver in PCI */
+slb_tdp_info_t _get_TDP_amd()
+{
+    slb_tdp_info_t tdp = {0};
+
+    uint32_t cpuregs[4];
+    uint32_t smuargs[2] = {0};
+
+    uint32_t family;
+    uint32_t model;
+    uint32_t design = 0;
+
+    uintptr_t addr = -1;
+
+    smu_amd* smu = nullptr;
+
+    void** phys_addr = get_phys_map();
+
+    cpuid(1, cpuregs);
+
+    /* follows CPUID AMD spec standard, however, AMD CPUs after 2003 all have base family as 0xF */
+    family = ((cpuregs[0] & 0xF00) >> 8) == 0xF ? ((cpuregs[0] & 0xF00) >> 0x8) + (( cpuregs[0] & 0xFF00000) >> 0x14) : (cpuregs[0] & 0xF00) >> 8;
+    model = ((cpuregs[0] & 0xF00) >> 8) == 0xF ? ((cpuregs[0] & 0xF0000) >> 0xC ) | ((cpuregs[0] & 0xF0) >> 4): (cpuregs[0] & 0xF0) >> 4;
+
+    _get_design_amd(family, model, &design);
+
+    if(_request_addr(design, &addr, &smu, smuargs) == (uint32_t)-1){
+        return tdp;
+    }
+
+    if(addr != (uint64_t)-1){
+        if(_map_dev_addr(addr)){
+            return tdp;
+        } 
+        _refresh_table(design, &smu, smuargs);
+
+        #define get_prop_from_offs(addr, offs) ((uint8_t)(*(float*)((uintptr_t)*(addr) + (offs))))
+
+        tdp.sustained = get_prop_from_offs(phys_addr, 0x0);
+        tdp.fast = get_prop_from_offs(phys_addr, 0x8);
+        tdp.slow = get_prop_from_offs(phys_addr, 0x10);
+    }
+
+    pci_cleanup(smu->dev);
+    _clear_smu_amd(smu);
+    _free_map_dev();
+
+    tdp.type = SLB_TDP_TYPE_AMD;
+
+    return tdp;
+}
+
+static string _get_cpu_name(){
+    slb_smbios_entry_t* entries = nullptr;
+    int count = 0;   
+    
+    if (slb_smbios_get(&entries,&count) == 0) {
+        for (int n=0;n<count;n++) {
+            if (entries[n].type == 4) {
+                return entries[n].data.processor.version;
+            }
+        }
+    }
+
+    return "";
+}
+
+slb_tdp_info_t slb_info_get_tdp_info()
+{
+    slb_tdp_info_t tdp = {0,0,0, .type = SLB_TDP_TYPE_UNKNOWN};
+    int32_t cpu_type;
+    
+    try {
+        string name = _get_cpu_name();
+
+        cpu_type = name.find("AMD") != std::string::npos ? SLB_TDP_TYPE_AMD : name.find("Intel") != std::string::npos ? SLB_TDP_TYPE_INTEL : -1;
+
+        switch(cpu_type){
+            case SLB_TDP_TYPE_INTEL:
+                tdp = _get_TDP_intel();
+                break;
+            case SLB_TDP_TYPE_AMD:
+                tdp = _get_TDP_amd();
+                break;
+            default:
+                break;
+        }
+    }
+    catch(...) {
+        // no need to take actions
+    }
+    
+    return tdp;
+}
+
 const char* slb_info_keyboard_device()
 {
     uint32_t platform = slb_info_get_platform();
@@ -806,6 +925,38 @@ int slb_config_store(uint32_t model)
     }
     
     return 0;
+}
+
+int slb_qc71_manual_control_get(uint32_t* value)
+{
+    if (value == nullptr) {
+        return EINVAL;
+    }
+    
+    try {
+        string svalue;
+        read_device(SYSFS_QC71"manual_control",svalue);
+        *value = std::stoi(svalue,0,10);
+    }
+    catch (...) {
+        return EIO;
+    }
+    
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_manual_control_set(uint32_t value)
+{
+    try {
+        stringstream ss;
+        ss<<value;
+        write_device(SYSFS_QC71"manual_control",ss.str());
+    }
+    catch (...) {
+        return EIO;
+    }
+    
+    return SLB_SUCCESS;
 }
 
 int slb_qc71_fn_lock_get(uint32_t* value)

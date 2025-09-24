@@ -20,7 +20,10 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #include "slimbook.h"
 #include "common.h"
+#include "amdsmu.h"
 
+#include "pci.h"
+#include <sys/stat.h>
 #include <sys/statvfs.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -30,7 +33,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <iostream>
 #include <iomanip>
 #include <string>
-#include <map>
 #include <vector>
 #include <fstream>
 #include <sstream>
@@ -42,6 +44,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <string.h>
 
 #define SLB_REPORT_PRIVATE "SLB_REPORT_PRIVATE"
+#define SYS_AMDGPU "/sys/class/drm/card%d/device/"
 
 using namespace std;
 
@@ -197,15 +200,15 @@ string get_info()
     int64_t m = (uptime / 60) % 60;
     int64_t s = uptime % 60;
     
-    sout<<"uptime:"<<h<<"h "<<m<<"m "<<s<<"s\n";
-    sout<<"kernel:"<<slb_info_kernel()<<"\n";
+    sout<<"uptime: "<<h<<"h "<<m<<"m "<<s<<"s\n";
+    sout<<"kernel: "<<slb_info_kernel()<<"\n";
     
     uint64_t tr,ar;
     
     tr = slb_info_total_memory();
     ar = slb_info_available_memory();
     
-    sout<<"memory free/total:"<<to_human(ar)<<"/"<<to_human(tr)<<"\n";
+    sout<<"memory free/total: "<<to_human(ar)<<"/"<<to_human(tr)<<"\n";
     
     std::vector<string> mounts = {"/", "/home", "/boot/efi", "/boot"};
     
@@ -224,7 +227,7 @@ string get_info()
                     uint64_t fbytes = stat.f_bsize * stat.f_bfree;
                     uint64_t tbytes = stat.f_bsize * stat.f_blocks;
                     
-                    sout<<"disk free/total:"<<dir<<" "<<to_human(fbytes)<<"/"<<to_human(tbytes)<<endl;
+                    sout<<"disk free/total: "<<dir<<" "<<to_human(fbytes)<<"/"<<to_human(tbytes)<<endl;
                 }
                 
                 break;
@@ -238,6 +241,100 @@ string get_info()
     // boot mode
 
     sout << (std::filesystem::exists("/sys/firmware/efi") ? "boot mode: UEFI\n" : "boot mode: legacy\n");
+    
+    sout<<"\n";
+    
+    sout<<"product: "<<slb_info_product_name()<<"\n";
+    sout<<"sku: "<<slb_info_product_sku()<<"\n";
+    sout<<"vendor: "<<slb_info_board_vendor()<<"\n";
+    sout<<"bios: "<<slb_info_bios_version()<<"\n";
+    sout<<"EC: "<<slb_info_ec_firmware_release()<<"\n";
+    
+    char* env = getenv(SLB_REPORT_PRIVATE);
+    
+    if (env and string(env) == "1") {
+        sout<<"serial: ******\n";
+    }
+    else {
+        sout<<"serial: "<<slb_info_product_serial()<<"\n";
+    }
+
+    sout<<"\n";
+    
+    slb_smbios_entry_t* entries = nullptr;
+    int count = 0;
+
+    if (slb_smbios_get(&entries,&count) == 0) {
+        for (int n=0;n<count;n++) {
+            if (entries[n].type == 4) {
+                string name = trim(entries[n].data.processor.version);
+                int count = entries[n].data.processor.threads;
+                slb_tdp_info_t tdp = {0};
+                 
+                sout<<"cpu: "<<name<<" x "<<count<<"\n";
+
+                tdp = slb_info_get_tdp_info();
+
+                switch (tdp.type) {
+                    case SLB_TDP_TYPE_INTEL:
+                        sout << "TDP: "<< (int)tdp.sustained << " W\n";
+                        break;
+
+                    case SLB_TDP_TYPE_AMD:
+                        sout << "TDP sustained (stapm): " << (int)tdp.sustained << " W\n";
+                        sout << "TDP slow limit (ppt-s): " << (int)tdp.slow << " W\n";
+                        sout << "TDP fast limit (ppt-l): " << (int)tdp.fast << " W\n";
+                        break;
+
+                    case SLB_TDP_TYPE_UNKNOWN:
+                        /* do nothing */
+                    default:
+                        break;
+                }
+
+                sout << "\n";
+            }
+
+            if (entries[n].type == 17) {
+                if (entries[n].data.memory_device.type > 2) {
+                    sout<<"memory device: "<<entries[n].data.memory_device.size<< (entries[n].data.memory_device.size_unit == 0 ? " MB " : " KB ") << entries[n].data.memory_device.speed<<" MT/s"<<"\n";
+                }
+            }
+        }
+        
+        slb_smbios_free(entries);
+    }
+
+    vector<string> modules = get_modules();
+    bool modFound = false;
+
+    for (string mod : modules) {
+        modFound = mod == "amdgpu" ? true : false;
+
+        if(modFound){
+            break;
+        }
+    }
+
+    if(modFound){
+        string vram_val = "1";
+        char buf[55];
+        
+        for(int i = 0; i < 8; i++){
+            snprintf(buf, sizeof(buf), SYS_AMDGPU"mem_info_vram_total", i);
+            if(filesystem::exists(buf)){
+                break;
+            }
+        }
+
+        read_device(string(buf), vram_val);
+
+        if(vram_val != "1"){
+            sout << "UMA Framebuffer: " << to_human(stoull(vram_val)) << "\n";
+        }
+    }
+
+    sout<<"\n";
 
     int ac_state;
     
@@ -264,97 +361,25 @@ string get_info()
         sout<<"ac: "<<ac_state_text<<"\n";
     }
     
-    sout<<"\n";
-    
-    sout<<"product:"<<slb_info_product_name()<<"\n";
-    sout<<"sku:"<<slb_info_product_sku()<<"\n";
-    sout<<"vendor:"<<slb_info_board_vendor()<<"\n";
-    sout<<"bios:"<<slb_info_bios_version()<<"\n";
-    sout<<"EC:"<<slb_info_ec_firmware_release()<<"\n";
-    
-    char* env = getenv(SLB_REPORT_PRIVATE);
-    
-    if (env and string(env) == "1") {
-        sout<<"serial: ******\n";
-    }
-    else {
-        sout<<"serial:"<<slb_info_product_serial()<<"\n";
-    }
-
-    sout<<"\n";
-    
-    slb_smbios_entry_t* entries = nullptr;
-    int count = 0;
-
-    if (slb_smbios_get(&entries,&count) == 0) {
-        for (int n=0;n<count;n++) {
-            if (entries[n].type == 4) {
-                string name = trim(entries[n].data.processor.version);
-                
-                int count = entries[n].data.processor.threads;
-                 
-                sout<<"cpu:"<<name<<" x "<<count<<endl;
-            }
-            
-            if (entries[n].type == 17) {
-                if (entries[n].data.memory_device.type > 2) {
-                    sout<<"memory device:"<<entries[n].data.memory_device.size<< (entries[n].data.memory_device.size_unit == 0 ? " MB " : " KB ") << entries[n].data.memory_device.speed<<" MT/s"<<endl;
-                }
-            }
-        }
-        
-        slb_smbios_free(entries);
-    }
-
-    vector<string> modules = get_modules();
-    bool modFound = false;
-
-    for (string mod : modules) {
-        modFound = mod == "amdgpu" ? true : false;
-
-        if(modFound){
-            break;
-        }
-    }
-
-    if(modFound){
-        #define SYS_AMDGPU "/sys/class/drm/card%d/device/"
-        string vram_val = "1";
-        char buf[sizeof(SYS_AMDGPU)];
-
-        for(int i = 0; i < 8; i++){
-            snprintf(buf, sizeof(buf), SYS_AMDGPU, i);
-            if(filesystem::exists(buf)){
-                break;
-            }
-        }
-
-        read_device(string(buf) + "mem_info_vram_total", vram_val);
-
-        sout << "UMA Framebuffer: " << to_human(stoull(vram_val)) << endl;
-    }
-
-    sout<<"\n";
-
     slb_sys_battery_info bat = {0};
 
     if(slb_battery_info_get(&bat) == 0){
         string stat;
 
         switch(bat.status){
-            case 0:
+            case SLB_BAT_STATE_UNKNOWN:
                 stat = "Unknown";
                 break;
-            case 1:
+            case SLB_BAT_STATE_CHARGING:
                 stat = "Charging";
-                break;            
-            case 2:
+                break;
+            case SLB_BAT_STATE_DISCHARGING:
                 stat = "Discharging";
-                break;            
-            case 3:
+                break;
+            case SLB_BAT_STATE_NOT_CHARGING:
                 stat = "Not charging";
                 break;
-            case 4:
+            case SLB_BAT_STATE_FULL:
                 stat = "Full";
                 break;
             default:
@@ -363,7 +388,7 @@ string get_info()
 
         uint32_t charge = bat.charge;
 
-        sout << "battery info: " << (int)(bat.capacity) << "% " << stat + " " << charge << " mAh" << endl;
+        sout << "battery info: " << (int)(bat.capacity) << "% " << stat + " " << charge << " mAh" << "\n";
     }
     
     int module_status = slb_info_is_module_loaded();
@@ -379,8 +404,8 @@ string get_info()
                 slb_qc71_primary_fan_get(&fan1);
                 slb_qc71_secondary_fan_get(&fan2);
 
-                sout << "primary fan speed: " << fan1 << " RPM" << endl;
-                sout << "secondary fan speed: " << fan2 << " RPM" << endl; 
+                sout << "primary fan speed: " << fan1 << " RPM" << "\n";
+                sout << "secondary fan speed: " << fan2 << " RPM" << "\n"; 
 
                 break;
 
@@ -392,9 +417,7 @@ string get_info()
                 break;
         }
     }
-
     
-
     sout<<"\n";
 
     uint32_t model = slb_info_get_model();
@@ -418,10 +441,10 @@ string get_info()
         uint32_t value = 0;
         
         slb_qc71_fn_lock_get(&value);
-        sout<<"fn lock:"<<yesno[value]<<"\n";
+        sout<<"fn lock: "<<yesno[value]<<"\n";
         
         slb_qc71_super_lock_get(&value);
-        sout<<"super key lock:"<<yesno[value]<<"\n";
+        sout<<"super key lock: "<<yesno[value]<<"\n";
         
         map<int,string> profile_gen_1 = {
             {SLB_QC71_PROFILE_SILENT,"silent"},
@@ -465,7 +488,7 @@ string get_info()
             profile_name = chosen_profile[profile];
         }
 
-        sout<<"profile:"<<profile_name<<"\n";
+        sout<<"profile: "<<profile_name<<"\n";
     }
     
     sout<<std::flush;
