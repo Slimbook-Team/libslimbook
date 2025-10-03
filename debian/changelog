@@ -1,7 +1,8 @@
-libslimbook (1.19.0~fallsupdate0) noble; urgency=medium
+libslimbook (1.19.0~fallsupdate1) noble; urgency=medium
 
   * New backlight and brightness control
   * Custom TDP on qc71 platforms
+  * Fixed missing return in brightness functions
 
  -- slimbook <dev@slimbook.es>  Thu, 02 Oct 2025 14:48:09 +0200
 
