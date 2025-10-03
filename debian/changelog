@@ -1,3 +1,10 @@
+libslimbook (1.19.0~fallsupdate2) noble; urgency=medium
+
+  * Fixed get backlight value
+  * Added bash completion
+
+ -- slimbook <dev@slimbook.es>  Fri, 03 Oct 2025 21:42:08 +0200
+
 libslimbook (1.19.0~fallsupdate1) noble; urgency=medium
 
   * New backlight and brightness control
