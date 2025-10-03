@@ -761,7 +761,7 @@ int slb_kbd_backlight_get(uint32_t model, uint32_t* color)
             rgb = rgb | (green << 8);
             rgb = rgb | (red << 16);
             
-            *color = red;
+            *color = rgb;
             
             return 0;
         }

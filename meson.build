@@ -7,4 +7,5 @@ install_data('slimbook-sleep', install_dir:'lib/systemd/system-sleep/')
 install_subdir('report.d', install_dir:'libexec/slimbook/')
 install_data('report-pack', install_dir:'libexec/slimbook/')
 install_data('slimbook-hello', install_dir:'bin/')
+install_data('slimbookctl.completion', install_dir:'share/bash-completion/completions/', rename:['slimbookctl'])
 

@@ -1,0 +1,15 @@
+have slimbookctl &&
+_slimbookctl()
+{
+    local cur prev opts base
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    #
+    #  The basic options we'll complete.
+    #
+    opts="info report report-full config-load config-store get-kbd-backlight get-kbd-brightness set-kbd-backlight set-kbd-brightness"
+
+}
+[ "$have" ] && complete -F _slimbookctl slimbookctl
