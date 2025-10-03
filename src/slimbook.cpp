@@ -42,6 +42,7 @@ using namespace std;
 #define SYSFS_DMI "/sys/devices/virtual/dmi/id/"
 #define SYSFS_QC71 "/sys/devices/platform/qc71_laptop/"
 #define SYSFS_CLEVO "/sys/devices/platform/clevo_platform/"
+#define SYSFS_LED_KBD "/sys/class/leds/rgb:kbd_backlight/"
 
 #define MODULE_QC71 "qc71_laptop"
 #define MODULE_CLEVO "clevo_platform"
@@ -148,6 +149,35 @@ string info_serial;
 uint32_t info_platform;
 uint32_t info_model;
 int32_t info_confidence;
+
+static vector<string> split(string input,char sep)
+{
+    vector<string> tmp;
+    bool knee = false;
+    string current;
+    
+    for (char c:input) {
+        
+        if (c != sep) {
+            current.push_back(c);
+            knee = true;
+        }
+        else {
+            if (knee == true) {
+                tmp.push_back(current);
+                current="";
+                knee = false;
+            }
+            
+        }
+    }
+    
+    if (current.size() > 0) {
+        tmp.push_back(current);
+    }
+    
+    return tmp;
+}
 
 static int min3i(int a,int b,int c)
 {
@@ -717,28 +747,21 @@ int slb_kbd_backlight_get(uint32_t model, uint32_t* color)
     if (model == SLB_MODEL_HERO_RPL_RTX or model == SLB_MODEL_CREATIVE_15_A8_RTX) {
         try {
             string svalue;
-            uint32_t rgb;
-            uint32_t ival;
             
-            read_device(SYSFS_QC71"kbd_backlight_rgb_red",svalue);
-            ival = std::stoi(svalue,0,16);
-            float mp = ival/200.0f; //0xC8
-            ival = mp * 255.0f;
-            rgb = ival<<16;
+            read_device(SYSFS_LED_KBD"multi_intensity",svalue);
+            vector<string> pl = split(svalue,' ');
             
-            read_device(SYSFS_QC71"kbd_backlight_rgb_green",svalue);
-            ival = std::stoi(svalue,0,16);
-            mp = ival/200.0f; //0xC8
-            ival = mp * 255.0f;
-            rgb = rgb | (ival<<8);
+            uint32_t red,green,blue;
             
-            read_device(SYSFS_QC71"kbd_backlight_rgb_blue",svalue);
-            ival = std::stoi(svalue,0,16);
-            mp = ival/200.0f; //0xC8
-            ival = mp * 255.0f;
-            rgb = rgb | ival;
+            red = std::stoi(pl[0],0,0);
+            green = std::stoi(pl[1],0,0);
+            blue = std::stoi(pl[2],0,0);
             
-            *color = rgb;
+            uint32_t rgb = blue;
+            rgb = rgb | (green << 8);
+            rgb = rgb | (red << 16);
+            
+            *color = red;
             
             return 0;
         }
@@ -770,7 +793,7 @@ int slb_kbd_backlight_get(uint32_t model, uint32_t* color)
 
 int slb_kbd_backlight_set(uint32_t model, uint32_t color)
 {
-   if (model == 0) {
+    if (model == 0) {
         model = slb_info_get_model();
     }
     
@@ -782,25 +805,10 @@ int slb_kbd_backlight_set(uint32_t model, uint32_t color)
         stringstream ss;
         try {
             uint32_t red = (color & 0x00ff0000) >> 16;
-            float mp = red/255.0f;
-            red = mp * 0xC8;
-            ss<<std::hex<<"0x"<<std::setfill('0')<<std::setw(2)<<red;
-            write_device(SYSFS_QC71"kbd_backlight_rgb_red",ss.str());
-            
-            
             uint32_t green = (color & 0x0000ff00) >> 8;
-            mp = green/255.0f;
-            green = mp * 0xC8;
-            ss.str("");
-            ss<<"0x"<<std::setfill('0')<<std::setw(2)<<green;
-            write_device(SYSFS_QC71"kbd_backlight_rgb_green",ss.str());
-            
             uint32_t blue = (color & 0x000000ff);
-            mp = blue/255.0f;
-            blue = mp * 0xC8;
-            ss.str("");
-            ss<<"0x"<<std::setfill('0')<<std::setw(2)<<blue;
-            write_device(SYSFS_QC71"kbd_backlight_rgb_blue",ss.str());
+            ss<<red<<" "<<green<<" "<<blue;
+            write_device(SYSFS_LED_KBD"multi_intensity",ss.str());
             
             return 0;
         }
@@ -820,6 +828,92 @@ int slb_kbd_backlight_set(uint32_t model, uint32_t color)
         catch (...) {
             return EIO;
         }
+    }
+    
+    return ENOENT;
+}
+
+int slb_kbd_brightness_get(uint32_t model, uint32_t* brightness)
+{
+    string svalue;
+    
+    if (model == 0) {
+        model = slb_info_get_model();
+    }
+    
+    if (model == 0) {
+        return ENOENT;
+    }
+    
+    if (model == SLB_MODEL_HERO_RPL_RTX or model == SLB_MODEL_CREATIVE_15_A8_RTX) {
+        try {
+            read_device(SYSFS_LED_KBD"brightness",svalue);
+            *brightness = std::stoi(svalue,0,0);
+
+            return 0;
+        }
+        catch(...) {
+            return EIO;
+        }
+    }
+    else {
+        /* this is workaround for rgb-keyboard on clevo based models */
+        *brightness = 0xff;
+    }
+    
+    return ENOENT;
+}
+
+int slb_kbd_brightness_set(uint32_t model, uint32_t brightness)
+{
+    if (model == 0) {
+        model = slb_info_get_model();
+    }
+    
+    if (model == 0) {
+        return ENOENT;
+    }
+    
+    if (model == SLB_MODEL_HERO_RPL_RTX or model == SLB_MODEL_CREATIVE_15_A8_RTX) {
+        try {
+            stringstream ss;
+            ss<<brightness;
+            write_device(SYSFS_LED_KBD"brightness",ss.str());
+
+            return 0;
+        }
+        catch(...) {
+            return EIO;
+        }
+    }
+    
+    return ENOENT;
+}
+
+int slb_kbd_brightness_max(uint32_t model, uint32_t* max)
+{
+    string svalue;
+    
+    if (model == 0) {
+        model = slb_info_get_model();
+    }
+    
+    if (model == 0) {
+        return ENOENT;
+    }
+    
+    if (model == SLB_MODEL_HERO_RPL_RTX or model == SLB_MODEL_CREATIVE_15_A8_RTX) {
+        try {
+            read_device(SYSFS_LED_KBD"max_brightness",svalue);
+            *max = std::stoi(svalue,0,0);
+        }
+        catch(...) {
+            return EIO;
+        }
+    }
+    else {
+        /* this is workaround for rgb-keyboard on clevo based models */
+        *max = 0xff;
     }
     
     return ENOENT;
@@ -1172,104 +1266,74 @@ int slb_qc71_turbo_mode_set(uint32_t value)
 
 int slb_qc71_profile_get(uint32_t* value)
 {
-    int status = EIO;
-    uint32_t silent;
-    uint32_t turbo;
-
-    *value = SLB_QC71_PROFILE_UNKNOWN;
-
-    switch (slb_info_get_family()) {
-        case SLB_MODEL_PROX:
-        case SLB_MODEL_EXECUTIVE:
-            status = slb_qc71_silent_mode_get(&silent);
-
-            if (status == SLB_SUCCESS) {
-                if (silent == 1) {
-                    *value = SLB_QC71_PROFILE_SILENT;
-                }
-                if (silent == 0) {
-                    *value = SLB_QC71_PROFILE_NORMAL;
-                }
-            }
-        break;
-
-        case SLB_MODEL_TITAN:
-        case SLB_MODEL_HERO:
-        case SLB_MODEL_EVO:
-        case SLB_MODEL_CREATIVE:
-
-            status = slb_qc71_silent_mode_get(&silent);
-
-            if (status == SLB_SUCCESS) {
-                status = slb_qc71_turbo_mode_get(&turbo);
-
-                if (status == SLB_SUCCESS) {
-
-                    if (silent == 1 and turbo == 0) {
-                        /* aka ENERGY SAVER */
-                        *value = SLB_QC71_PROFILE_SILENT;
-                    }
-
-                    if (silent == 0 and turbo == 0) {
-                        /* aka BALANCED */
-                        *value = SLB_QC71_PROFILE_NORMAL;
-                    }
-
-                    if (silent == 0 and turbo == 1) {
-                        *value = SLB_QC71_PROFILE_PERFORMANCE;
-                    }
-                }
-            }
-        break;
-
+    if (value == nullptr) {
+        return EINVAL;
     }
-
-    return status;
+    
+    try {
+        string svalue;
+        read_device(SYSFS_QC71"performance_mode",svalue);
+        *value = std::stoi(svalue,0,10);
+    }
+    catch (...) {
+        return EIO;
+    }
+    
+    return SLB_SUCCESS;
 }
 
 int slb_qc71_profile_set(uint32_t value)
 {
-    int status = EIO;
-
-    switch (slb_info_get_family()) {
-        case SLB_MODEL_PROX:
-        case SLB_MODEL_EXECUTIVE:
-            switch (value) {
-                case SLB_QC71_PROFILE_SILENT:
-                    status = slb_qc71_silent_mode_set(1);
-                break;
-
-                case SLB_QC71_PROFILE_NORMAL:
-                    status = slb_qc71_silent_mode_set(0);
-                break;
-            }
-
-        break;
-
-        case SLB_MODEL_TITAN:
-        case SLB_MODEL_HERO:
-        case SLB_MODEL_EVO:
-        case SLB_MODEL_CREATIVE:
-
-            switch (value) {
-                case SLB_QC71_PROFILE_SILENT:
-                    status = slb_qc71_turbo_mode_set(0);
-                    status |= slb_qc71_silent_mode_set(1);
-                break;
-
-                case SLB_QC71_PROFILE_NORMAL:
-                    status = slb_qc71_turbo_mode_set(0);
-                    status |= slb_qc71_silent_mode_set(0);
-                break;
-
-                case SLB_QC71_PROFILE_PERFORMANCE:
-                    status = slb_qc71_silent_mode_set(0);
-                    status |= slb_qc71_turbo_mode_set(1);
-                break;
-            }
-
-        break;
+    try {
+        stringstream ss;
+        ss<<value;
+        write_device(SYSFS_QC71"performance_mode",ss.str());
+    }
+    catch (...) {
+        return EIO;
     }
 
-    return status;
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_custom_tdp_get(uint32_t* pl1, uint32_t* pl2, uint32_t* pl4)
+{
+    if (pl1 == nullptr or pl2 == nullptr or pl4 == nullptr) {
+        return EINVAL;
+    }
+    
+    try {
+        string svalue;
+        read_device(SYSFS_QC71"custom_tdp",svalue);
+        vector<string> pl = split(svalue,' ');
+        
+        *pl1 = std::stoi(pl[0],0,0);
+        *pl2 = std::stoi(pl[1],0,0);
+        *pl4 = std::stoi(pl[2],0,0);
+    }
+    catch (...) {
+        return EIO;
+    }
+    
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_custom_tdp_set(uint32_t pl1, uint32_t pl2, uint32_t pl4)
+{
+    const uint32_t max_tdp = 80;
+    
+    pl1 = std::min(pl1,max_tdp);
+    pl2 = std::min(pl2,max_tdp);
+    pl4 = std::min(pl4,max_tdp);
+    
+    try {
+        stringstream ss;
+        ss<<pl1<<" "<<pl2<<" "<<pl4;
+        write_device(SYSFS_QC71"custom_tdp",ss.str());
+    }
+    catch (...) {
+        return EIO;
+    }
+
+    return SLB_SUCCESS;
 }
