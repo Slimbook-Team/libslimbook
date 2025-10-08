@@ -231,7 +231,11 @@ int _map_dev_addr(uintptr_t addr){
         int map_errno = errno;
         close(dev_fd);
 
-        return map_errno;
+        if (phys_map == MAP_FAILED) {
+            return map_errno;
+        }
+
+        return 0;
     }
 
     return dev_errno;
