@@ -1,3 +1,10 @@
+libslimbook (1.19.0~fallsupdate3) noble; urgency=medium
+
+  * Fixed bash completion
+  * Fixed AMD TDP reading bug
+
+ -- Slimbook <dev@slimbook.es>  Wed, 08 Oct 2025 09:35:44 +0200
+
 libslimbook (1.19.0~fallsupdate2) noble; urgency=medium
 
   * Fixed get backlight value
