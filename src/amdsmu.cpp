@@ -264,6 +264,8 @@ uint32_t _request_addr(uint32_t design, uintptr_t* addr, smu_amd** smu, uint32_t
         case DESIGN_REMBRANDT:
         case DESIGN_PHOENIX:
         case DESIGN_PHOENIX_2:
+        case DESIGN_STRIX_POINT_1:
+        case DESIGN_STRIX_POINT_2:
             table_msg = 0x66;
             break;
         default:
@@ -285,6 +287,8 @@ uint32_t _request_addr(uint32_t design, uintptr_t* addr, smu_amd** smu, uint32_t
             case DESIGN_REMBRANDT:
             case DESIGN_PHOENIX:
             case DESIGN_PHOENIX_2:
+            case DESIGN_STRIX_POINT_1:
+            case DESIGN_STRIX_POINT_2:
                 *addr = (uint64_t) smuargs[1] << 32 | smuargs[0];
                 return 0;
             default:
