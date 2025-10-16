@@ -589,6 +589,7 @@ int main(int argc,char* argv[])
         return 0;
     }
     
+    /* Experimental! */
     if (command == "set-custom-tdp") {
         if (argc < 4) {
             show_help();

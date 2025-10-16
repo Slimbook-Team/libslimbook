@@ -319,6 +319,8 @@ uint32_t _refresh_table(uint32_t design, smu_amd** smu, uint32_t* smuargs){
         case DESIGN_REMBRANDT:
         case DESIGN_PHOENIX:
         case DESIGN_PHOENIX_2:
+        case DESIGN_STRIX_POINT_1:
+        case DESIGN_STRIX_POINT_2:
             table_msg = 0x65;
             break;
         default:
