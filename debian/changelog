@@ -1,3 +1,9 @@
+libslimbook (1.19.1) noble; urgency=medium
+
+  * Backlight fix for some models
+
+ -- Slimbook <dev@slimbook.es>  Fri, 05 Dec 2025 07:57:49 +0100
+
 libslimbook (1.19.0~fallsupdate5) noble; urgency=medium
 
   * Fixed support of Evo AI9 TDP
