@@ -280,6 +280,14 @@ string get_info()
                 switch (tdp.type) {
                     case SLB_TDP_TYPE_INTEL:
                         sout << "TDP: "<< (int)tdp.sustained << " W\n";
+                        if (tdp.slow > 0) {
+                            sout << "TDP slow: "<< (int)tdp.slow << " W\n";
+                        }
+                        
+                        if (tdp.fast > 0) {
+                            sout << "TDP peak: "<< (int)tdp.fast << " W\n";
+                        }
+
                         break;
 
                     case SLB_TDP_TYPE_AMD:

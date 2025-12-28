@@ -49,6 +49,8 @@ using namespace std;
 
 #define SLB_SUCCESS 0
 
+#define SLB_MICROWATTS 1000000
+
 thread_local std::string buffer;
 
 struct database_entry_t
@@ -558,11 +560,31 @@ slb_tdp_info_t _get_TDP_intel()
     slb_tdp_info_t tdp = {0};
 
     if(filesystem::exists(INTEL_RAPL_PATH)){
-        string svalue;
-        read_device(INTEL_RAPL_PATH"constraint_0_power_limit_uw", svalue);
+        try {
+            string svalue;
+            read_device(INTEL_RAPL_PATH"constraint_0_power_limit_uw", svalue);
 
-        tdp.sustained = atoll(svalue.c_str()) / 1000000;
-        tdp.type = SLB_TDP_TYPE_INTEL;
+            tdp.sustained = atoll(svalue.c_str()) / SLB_MICROWATTS;
+            tdp.type = SLB_TDP_TYPE_INTEL;
+        }
+        catch(...) {
+        }
+        
+        if (tdp.type != 0) {
+            // if we achieved to read at least long-term limit, try other ones but may not exist
+            try {
+                string svalue;
+                read_device(INTEL_RAPL_PATH"constraint_1_power_limit_uw", svalue);
+
+                tdp.slow = atoll(svalue.c_str()) / SLB_MICROWATTS;
+                
+                read_device(INTEL_RAPL_PATH"constraint_2_power_limit_uw", svalue);
+
+                tdp.fast = atoll(svalue.c_str()) / SLB_MICROWATTS;
+            }
+            catch(...) {
+            }
+        }
     }
     
     return tdp;
@@ -661,6 +683,40 @@ slb_tdp_info_t slb_info_get_tdp_info()
     }
     
     return tdp;
+}
+
+uint32_t slb_info_tdp_get(slb_tdp_info_t* info)
+{
+    slb_tdp_info_t tdp = {0,0,0, .type = SLB_TDP_TYPE_UNKNOWN};
+    int32_t cpu_type;
+    
+    try {
+        string name = _get_cpu_name();
+
+        cpu_type = name.find("AMD") != std::string::npos ? SLB_TDP_TYPE_AMD : name.find("Intel") != std::string::npos ? SLB_TDP_TYPE_INTEL : -1;
+
+        switch(cpu_type){
+            case SLB_TDP_TYPE_INTEL:
+                tdp = _get_TDP_intel();
+                break;
+            case SLB_TDP_TYPE_AMD:
+                tdp = _get_TDP_amd();
+                break;
+            default:
+                break;
+        }
+    }
+    catch(...) {
+        return ENOENT; //select any better?
+    }
+    
+    if (!info) {
+        return ENOENT;
+    }
+    
+    *info = tdp;
+    
+    return 0;
 }
 
 const char* slb_info_keyboard_device()

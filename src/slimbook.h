@@ -176,11 +176,10 @@ typedef struct {
 } slb_sys_battery_info;
 
 typedef struct {
-    uint8_t slow;
-    uint8_t fast;
-    uint8_t sustained;
+    uint16_t slow;
+    uint16_t fast;
+    uint16_t sustained;
 
-    /* AMD mentions 3 types of TDP while Intel only shows max, 0 Intel, 1 AMD */
     uint8_t type : 2;
 } slb_tdp_info_t;
 
@@ -243,6 +242,9 @@ extern "C" uint64_t slb_info_available_memory();
 
 /* Gets current TDP */
 extern "C" slb_tdp_info_t slb_info_get_tdp_info();
+
+/* Gets current TDP */
+extern "C" uint32_t slb_info_tdp_get(slb_tdp_info_t* info);
 
 /* Gets keyboard device path, or null if does not apply */
 extern "C" const char* slb_info_keyboard_device();
