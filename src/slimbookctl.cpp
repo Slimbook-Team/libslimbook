@@ -481,6 +481,10 @@ string get_info()
             case SLB_MODEL_PROX:
             case SLB_MODEL_EXECUTIVE:
                 chosen_profile = profile_gen_1;
+
+                if (slb_info_get_model() == SLB_MODEL_EXECUTIVE_UC2) {
+                    chosen_profile = profile_gen_3;
+                }
             break;
 
             case SLB_MODEL_TITAN:

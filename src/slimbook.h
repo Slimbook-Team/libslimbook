@@ -226,6 +226,9 @@ extern "C" uint32_t slb_info_find_platform(uint32_t model);
 /* Checks if platform module is loaded */
 extern "C" uint32_t slb_info_is_module_loaded();
 
+/* Gets number of supported performance modes in this model */
+extern "C" uint32_t slb_info_get_performance_profiles();
+
 /* Gets system uptime in seconds */
 extern "C" int64_t slb_info_uptime();
 

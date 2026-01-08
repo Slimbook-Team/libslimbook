@@ -501,6 +501,37 @@ uint32_t slb_info_is_module_loaded()
     return SLB_MODULE_NOT_LOADED;
 }
 
+uint32_t slb_info_get_performance_profiles()
+{
+    uint32_t count = 0;
+
+    uint32_t model = slb_info_get_model();
+    uint32_t family = model & SLB_FAMILY_MASK;
+
+    switch (family) {
+
+        case SLB_MODEL_PROX:
+        case SLB_MODEL_EXECUTIVE:
+            count = 2;
+
+            if (model == SLB_MODEL_EXECUTIVE_UC2) {
+                count = 3;
+            }
+        break;
+
+        case SLB_MODEL_TITAN:
+        case SLB_MODEL_HERO:
+        case SLB_MODEL_EVO:
+        case SLB_MODEL_CREATIVE:
+        case SLB_MODEL_EXCALIBUR:
+            count = 3;
+        break;
+
+    }
+
+    return count;
+}
+
 int64_t slb_info_uptime()
 {
     struct sysinfo info;
