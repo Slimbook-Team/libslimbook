@@ -49,6 +49,8 @@ using namespace std;
 
 #define SLB_SUCCESS 0
 
+#define SLB_MICROWATTS 1000000
+
 thread_local std::string buffer;
 
 struct database_entry_t
@@ -103,6 +105,7 @@ database_entry_t database [] = {
     {"EVO15-AI9-STP", 0, "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_EVO_15_AI9_STP},
 
     {"CREA15-A8-RTX", 0, "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_CREATIVE_15_A8_RTX},
+    {"CREA15-AI9-RTX5", 0, "SLIMBOOK", SLB_PLATFORM_QC71, SLB_MODEL_CREATIVE_15_AI9_RTX5},
 
     {"ZERO-N100-4RJ", 0, "SLIMBOOK", SLB_PLATFORM_UNKNOWN, SLB_MODEL_ZERO_N100_4RJ},
     {"ZERO-V5", 0, "SLIMBOOK", SLB_PLATFORM_UNKNOWN, SLB_MODEL_ZERO_V5},
@@ -498,6 +501,37 @@ uint32_t slb_info_is_module_loaded()
     return SLB_MODULE_NOT_LOADED;
 }
 
+uint32_t slb_info_get_performance_profiles()
+{
+    uint32_t count = 0;
+
+    uint32_t model = slb_info_get_model();
+    uint32_t family = model & SLB_FAMILY_MASK;
+
+    switch (family) {
+
+        case SLB_MODEL_PROX:
+        case SLB_MODEL_EXECUTIVE:
+            count = 2;
+
+            if (model == SLB_MODEL_EXECUTIVE_UC2) {
+                count = 3;
+            }
+        break;
+
+        case SLB_MODEL_TITAN:
+        case SLB_MODEL_HERO:
+        case SLB_MODEL_EVO:
+        case SLB_MODEL_CREATIVE:
+        case SLB_MODEL_EXCALIBUR:
+            count = 3;
+        break;
+
+    }
+
+    return count;
+}
+
 int64_t slb_info_uptime()
 {
     struct sysinfo info;
@@ -558,11 +592,31 @@ slb_tdp_info_t _get_TDP_intel()
     slb_tdp_info_t tdp = {0};
 
     if(filesystem::exists(INTEL_RAPL_PATH)){
-        string svalue;
-        read_device(INTEL_RAPL_PATH"constraint_0_power_limit_uw", svalue);
+        try {
+            string svalue;
+            read_device(INTEL_RAPL_PATH"constraint_0_power_limit_uw", svalue);
 
-        tdp.sustained = atoll(svalue.c_str()) / 1000000;
-        tdp.type = SLB_TDP_TYPE_INTEL;
+            tdp.sustained = atoll(svalue.c_str()) / SLB_MICROWATTS;
+            tdp.type = SLB_TDP_TYPE_INTEL;
+        }
+        catch(...) {
+        }
+        
+        if (tdp.type != 0) {
+            // if we achieved to read at least long-term limit, try other ones but may not exist
+            try {
+                string svalue;
+                read_device(INTEL_RAPL_PATH"constraint_1_power_limit_uw", svalue);
+
+                tdp.slow = atoll(svalue.c_str()) / SLB_MICROWATTS;
+                
+                read_device(INTEL_RAPL_PATH"constraint_2_power_limit_uw", svalue);
+
+                tdp.fast = atoll(svalue.c_str()) / SLB_MICROWATTS;
+            }
+            catch(...) {
+            }
+        }
     }
     
     return tdp;
@@ -661,6 +715,40 @@ slb_tdp_info_t slb_info_get_tdp_info()
     }
     
     return tdp;
+}
+
+uint32_t slb_info_tdp_get(slb_tdp_info_t* info)
+{
+    slb_tdp_info_t tdp = {0,0,0, .type = SLB_TDP_TYPE_UNKNOWN};
+    int32_t cpu_type;
+    
+    try {
+        string name = _get_cpu_name();
+
+        cpu_type = name.find("AMD") != std::string::npos ? SLB_TDP_TYPE_AMD : name.find("Intel") != std::string::npos ? SLB_TDP_TYPE_INTEL : -1;
+
+        switch(cpu_type){
+            case SLB_TDP_TYPE_INTEL:
+                tdp = _get_TDP_intel();
+                break;
+            case SLB_TDP_TYPE_AMD:
+                tdp = _get_TDP_amd();
+                break;
+            default:
+                break;
+        }
+    }
+    catch(...) {
+        return ENOENT; //select any better?
+    }
+    
+    if (!info) {
+        return ENOENT;
+    }
+    
+    *info = tdp;
+    
+    return 0;
 }
 
 const char* slb_info_keyboard_device()

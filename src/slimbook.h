@@ -76,6 +76,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 #define SLB_MODEL_CREATIVE            0x020000
 #define SLB_MODEL_CREATIVE_15_A8_RTX  0x020001
+#define SLB_MODEL_CREATIVE_15_AI9_RTX5 0x020002
 
 #define SLB_MODEL_ZERO              0x01000000
 #define SLB_MODEL_ZERO_V4           0x01000001
@@ -176,11 +177,10 @@ typedef struct {
 } slb_sys_battery_info;
 
 typedef struct {
-    uint8_t slow;
-    uint8_t fast;
-    uint8_t sustained;
+    uint16_t slow;
+    uint16_t fast;
+    uint16_t sustained;
 
-    /* AMD mentions 3 types of TDP while Intel only shows max, 0 Intel, 1 AMD */
     uint8_t type : 2;
 } slb_tdp_info_t;
 
@@ -226,6 +226,9 @@ extern "C" uint32_t slb_info_find_platform(uint32_t model);
 /* Checks if platform module is loaded */
 extern "C" uint32_t slb_info_is_module_loaded();
 
+/* Gets number of supported performance modes in this model */
+extern "C" uint32_t slb_info_get_performance_profiles();
+
 /* Gets system uptime in seconds */
 extern "C" int64_t slb_info_uptime();
 
@@ -243,6 +246,9 @@ extern "C" uint64_t slb_info_available_memory();
 
 /* Gets current TDP */
 extern "C" slb_tdp_info_t slb_info_get_tdp_info();
+
+/* Gets current TDP */
+extern "C" uint32_t slb_info_tdp_get(slb_tdp_info_t* info);
 
 /* Gets keyboard device path, or null if does not apply */
 extern "C" const char* slb_info_keyboard_device();
