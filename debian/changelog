@@ -1,3 +1,10 @@
+libslimbook (1.20.0) noble; urgency=medium
+
+  * Added new Creative id
+  * Added a function that returns expected number of slimbook performance profiles
+
+ -- Slimbook <dev@slimbook.es>  Fri, 09 Jan 2026 22:53:04 +0100
+
 libslimbook (1.19.1) noble; urgency=medium
 
   * Backlight fix for some models
