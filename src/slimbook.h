@@ -82,9 +82,12 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_MODEL_ZERO_V4           0x01000001
 #define SLB_MODEL_ZERO_V5           0x01000002
 #define SLB_MODEL_ZERO_N100_4RJ     0x01000003
+#define SLB_MODEL_ZERO_N150_4RJ     0x01000004
 
 #define SLB_MODEL_ONE               0x02000000
 #define SLB_MODEL_ONE_AMD8          0x02000001
+#define SLB_MODEL_ONE_M9_H2         0x02000002
+#define SLB_MODEL_ONE_M9_AI9        0x02000003
 
 #define SLB_MODEL_NAS               0x04000000
 #define SLB_MODEL_NAS_AMD8_8HDD_4RJ 0x04000001
