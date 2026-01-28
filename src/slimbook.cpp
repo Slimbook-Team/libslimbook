@@ -289,13 +289,28 @@ int32_t slb_info_retrieve()
     if (info_cached) {
         return 0;
     }
-
+    
     _get_info_dev("product_name", &info_product);
     _get_info_dev("product_sku", &info_sku);
     _get_info_dev("board_vendor", &info_vendor);
     _get_info_dev("bios_version", &info_bios_version);
     _get_info_dev("ec_firmware_release", &info_ec_firmware_release);
     _get_info_dev("product_serial", &info_serial);
+    
+    char* env = getenv("SLIMBOOK_OVERRIDE_NAME");
+    
+    if (env) {
+        vector<string> tmp = split(env,':');
+        
+        if (tmp.size() == 1) {
+            info_product = tmp[0];
+        }
+        
+        if (tmp.size() == 2) {
+            info_vendor = tmp[0];
+            info_product = tmp[1];
+        }
+    }
     
     string pretty_product = pretty_string(info_product);
     string pretty_vendor = pretty_string(info_vendor);
