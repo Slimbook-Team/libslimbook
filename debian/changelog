@@ -1,3 +1,9 @@
+libslimbook (1.21.0) nobole; urgency=medium
+
+  * Added a name override feature in order to fake model recognition (ie: debuging)
+
+ -- Slimbook <dev@slimbook.es>  Wed, 28 Jan 2026 18:09:55 +0100
+
 libslimbook (1.20.1) noble; urgency=medium
 
   * Added new model ids
