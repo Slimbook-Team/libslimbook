@@ -1445,3 +1445,21 @@ int slb_qc71_custom_tdp_set(uint32_t pl1, uint32_t pl2, uint32_t pl4)
 
     return SLB_SUCCESS;
 }
+
+int slb_qc71_custom_mode_get(uint32_t* value)
+{
+    if (value == nullptr) {
+        return EINVAL;
+    }
+
+    try {
+        string svalue;
+        read_device(SYSFS_QC71"custom_mode",svalue);
+        *value = std::stoi(svalue,0,10);
+    }
+    catch (...) {
+        return EIO;
+    }
+
+    return SLB_SUCCESS;
+}
