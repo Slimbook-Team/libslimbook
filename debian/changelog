@@ -1,4 +1,10 @@
-libslimbook (1.21.0) nobole; urgency=medium
+libslimbook (1.22.0) noble; urgency=medium
+
+  * Exposing custom tdp feature (but use with caution)
+
+ -- Slimbook <dev@slimbook.es>  Tue, 24 Feb 2026 18:03:14 +0100
+
+libslimbook (1.21.0) noble; urgency=medium
 
   * Added a name override feature in order to fake model recognition (ie: debuging)
 
