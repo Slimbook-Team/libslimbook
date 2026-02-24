@@ -179,6 +179,8 @@ void show_help()
     cout<<"set-kbd-backlight HEX: sets keyboard backlight as 32bit hexadecimal"<<endl;
     cout<<"get-kbd-brightness: shows current keyboard brightness value"<<endl;
     cout<<"set-kbd-brightness VALUE: sets keyboard brightness value [0-255]"<<endl;
+    cout<<"get-custom-tdp: gets custom TDP (Where available)"<<endl;
+    cout<<"set-custom-tdp PL1 PL2 PL4: sets custom TDP (Where available). Set all to zero to disable it"<<endl;
     cout<<"config-load: loads module settings"<<endl;
     cout<<"config-store: stores module settings to disk"<<endl;
     cout<<"report: creates a tar.gz with system information"<<endl;
@@ -498,10 +500,19 @@ string get_info()
             break;
         }
 
-        if (slb_qc71_profile_get(&profile) == 0) {
-            profile_name = chosen_profile[profile];
+        uint32_t custom = 0;
+
+        if (slb_qc71_custom_mode_get(&custom) == 0) {
+            if (custom == 1) {
+                profile_name = "custom";
+            }
         }
 
+        if (custom < 1) {
+            if (slb_qc71_profile_get(&profile) == 0) {
+                profile_name = chosen_profile[profile];
+            }
+        }
         sout<<"profile: "<<profile_name<<"\n";
     }
     
