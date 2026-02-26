@@ -179,6 +179,9 @@ void show_help()
     cout<<"set-kbd-backlight HEX: sets keyboard backlight as 32bit hexadecimal"<<endl;
     cout<<"get-kbd-brightness: shows current keyboard brightness value"<<endl;
     cout<<"set-kbd-brightness VALUE: sets keyboard brightness value [0-255]"<<endl;
+    cout<<"get-fn-lock: gets Fn lock status"<<endl;
+    cout<<"set-fn-lock VALUE: sets Fn lock [0-1]"<<endl;
+    cout<<"toggle-fn-lock: toggle Fn lock"<<endl;
     cout<<"get-custom-tdp: gets custom TDP (Where available)"<<endl;
     cout<<"set-custom-tdp PL1 PL2 PL4: sets custom TDP (Where available). Set all to zero to disable it"<<endl;
     cout<<"config-load: loads module settings"<<endl;
@@ -652,6 +655,61 @@ int main(int argc,char* argv[])
         cout<<pl1<<" "<<pl2<<" "<<pl4<<endl;
         
         return 0;
+    }
+
+    if (command == "set-fn-lock") {
+        int status;
+
+        if (argc < 3) {
+            show_help();
+            return 1;
+        }
+
+        uint32_t value = std::stoi(argv[2],0,0);
+
+        status = slb_qc71_fn_lock_set(value);
+
+        return status;
+    }
+
+    if (command == "get-fn-lock") {
+        int status;
+        uint32_t value;
+
+        status = slb_qc71_fn_lock_get(&value);
+
+        if (status > 0) {
+            return status;
+        }
+
+        cout<<"fn-lock:";
+
+        if (value == 1) {
+            clog<<"on";
+        }
+        else {
+            clog<<"off";
+        }
+
+        clog<<endl;
+
+        return 0;
+    }
+
+    if (command == "toggle-fn-lock") {
+        int status;
+        uint32_t value;
+
+        status = slb_qc71_fn_lock_get(&value);
+
+        if (status > 0) {
+            return status;
+        }
+
+        value = ~value;
+        status = slb_qc71_fn_lock_set(value);
+
+        return status;
     }
     
     if (command == "config-load") {
