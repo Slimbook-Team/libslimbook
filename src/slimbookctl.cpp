@@ -685,13 +685,13 @@ int main(int argc,char* argv[])
         cout<<"fn-lock:";
 
         if (value == 1) {
-            clog<<"on";
+            cout<<"on";
         }
         else {
-            clog<<"off";
+            cout<<"off";
         }
 
-        clog<<endl;
+        cout<<endl;
 
         return 0;
     }
@@ -706,7 +706,7 @@ int main(int argc,char* argv[])
             return status;
         }
 
-        value = ~value;
+        value = !(value & 0x1);
         status = slb_qc71_fn_lock_set(value);
 
         return status;
