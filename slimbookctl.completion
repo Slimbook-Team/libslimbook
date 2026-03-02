@@ -8,7 +8,7 @@ _slimbookctl()
     #
     #  The basic options we'll complete.
     #
-    opts="info report report-full config-load config-store get-kbd-backlight get-kbd-brightness set-kbd-backlight set-kbd-brightness get-custom-tdp set-custom-tdp"
+    opts="info report report-full config-load config-store get-kbd-backlight get-kbd-brightness set-kbd-backlight set-kbd-brightness get-custom-tdp set-custom-tdp get-fn-lock set-fn-lock toggle-fn-lock"
 
 
     case "${prev}" in
