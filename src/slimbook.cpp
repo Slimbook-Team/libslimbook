@@ -287,8 +287,8 @@ static void _get_info_dev(string type, string* str){
 
 static bool find_led_device(string& out)
 {
-    const std::filesystem::path base{"/sys/class/led"};
-    const std::regex led_regex(".+:kbd_backlight");
+    const std::filesystem::path base{"/sys/class/leds"};
+    const std::regex led_regex(".+::kbd_backlight");
 
     for (auto const& dir : std::filesystem::directory_iterator{base}) {
         if (dir.is_directory()) {
@@ -909,7 +909,7 @@ int slb_kbd_backlight_get(uint32_t model, uint32_t* color)
             string svalue;
 
             read_device(device+"/color", svalue);
-            *color = std::stoi(svalue);
+            *color = std::stoi(svalue,0,16);
 
             return 0;
 
