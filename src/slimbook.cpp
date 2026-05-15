@@ -36,6 +36,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <iomanip>
 #include <iostream>
 #include <filesystem>
+#include <regex>
 
 using namespace std;
 
@@ -282,6 +283,25 @@ static void _get_info_dev(string type, string* str){
     catch(...){
         *str = "<empty>";
     }
+}
+
+static bool find_led_device(string& out)
+{
+    const std::filesystem::path base{"/sys/class/led"};
+    const std::regex led_regex(".+:kbd_backlight");
+
+    for (auto const& dir : std::filesystem::directory_iterator{base}) {
+        if (dir.is_directory()) {
+
+            string parent = dir.path().filename();
+            if (std::regex_match(parent,led_regex)) {
+                out = dir.path();
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 int32_t slb_info_retrieve()
@@ -850,6 +870,7 @@ int slb_kbd_backlight_get(uint32_t model, uint32_t* color)
         return ENOENT;
     }
     
+    /* managed by QC71 platform driver */
     if (model == SLB_MODEL_HERO_RPL_RTX or model == SLB_MODEL_CREATIVE_15_A8_RTX) {
         try {
             string svalue;
@@ -870,6 +891,28 @@ int slb_kbd_backlight_get(uint32_t model, uint32_t* color)
             *color = rgb;
             
             return 0;
+        }
+        catch(...) {
+            return EIO;
+        }
+    }
+
+    /* managed by HID ITE8291R3 driver */
+    if (model == SLB_MODEL_TITAN or model == SLB_MODEL_CREATIVE_15_AI9_RTX5) {
+        try {
+            string device;
+
+            if (!find_led_device(device)) {
+                return EIO;
+            }
+
+            string svalue;
+
+            read_device(device+"/color", svalue);
+            *color = std::stoi(svalue);
+
+            return 0;
+
         }
         catch(...) {
             return EIO;
@@ -922,6 +965,26 @@ int slb_kbd_backlight_set(uint32_t model, uint32_t color)
             return EIO;
         }
     }
+
+    if (model == SLB_MODEL_TITAN or model == SLB_MODEL_CREATIVE_15_AI9_RTX5) {
+        try {
+            string device;
+
+            if(!find_led_device(device)) {
+                return EIO;
+            }
+
+            stringstream ss;
+            ss<<std::hex<<color;
+            write_device(device+"/color",ss.str());
+
+            return 0;
+
+        }
+        catch (...) {
+            return EIO;
+        }
+    }
     
     if ((model & SLB_MODEL_ELEMENTAL) > 0 or model == SLB_MODEL_HERO_S_TGL_RTX) {
         try {
@@ -958,18 +1021,33 @@ int slb_kbd_brightness_get(uint32_t model, uint32_t* brightness)
 
             return 0;
         }
-        catch(...) {
+        catch (...) {
             return EIO;
         }
     }
-    else {
-        /* this is workaround for rgb-keyboard on clevo based models */
-        *brightness = 0xff;
 
-        return 0;
+    if (model == SLB_MODEL_TITAN or model == SLB_MODEL_CREATIVE_15_AI9_RTX5) {
+        try {
+            string device;
+
+            if (!find_led_device(device)){
+                return EIO;
+            }
+
+            read_device(device+"/brightness",svalue);
+            *brightness = std::stoi(svalue,0,0);
+
+            return 0;
+        }
+        catch (...) {
+            return EIO;
+        }
     }
-    
-    return ENOENT;
+
+    /* this is workaround for rgb-keyboard on clevo based models */
+    *brightness = 0xff;
+
+    return 0;
 }
 
 int slb_kbd_brightness_set(uint32_t model, uint32_t brightness)
@@ -990,7 +1068,26 @@ int slb_kbd_brightness_set(uint32_t model, uint32_t brightness)
 
             return 0;
         }
-        catch(...) {
+        catch (...) {
+            return EIO;
+        }
+    }
+
+    if (model == SLB_MODEL_TITAN or model == SLB_MODEL_CREATIVE_15_AI9_RTX5) {
+        try {
+            string device;
+
+            if (!find_led_device(device)) {
+                return EIO;
+            }
+
+            stringstream ss;
+            ss<<brightness;
+            write_device(device+"/brightness",ss.str());
+
+            return 0;
+        }
+        catch (...) {
             return EIO;
         }
     }
@@ -1015,16 +1112,31 @@ int slb_kbd_brightness_max(uint32_t model, uint32_t* max)
             read_device(SYSFS_LED_KBD"max_brightness",svalue);
             *max = std::stoi(svalue,0,0);
         }
-        catch(...) {
+        catch (...) {
             return EIO;
         }
     }
-    else {
-        /* this is workaround for rgb-keyboard on clevo based models */
-        *max = 0xff;
+
+    if (model == SLB_MODEL_TITAN or model == SLB_MODEL_CREATIVE_15_AI9_RTX5) {
+        try {
+            string device;
+
+            if (!find_led_device(device)) {
+                return EIO;
+            }
+
+            read_device(device+"/max_brightness",svalue);
+            *max = std::stoi(svalue,0,0);
+        }
+        catch (...) {
+            return EIO;
+        }
     }
+
+    /* this is workaround for rgb-keyboard on clevo based models */
+    *max = 0xff;
     
-    return ENOENT;
+    return 0;
 }
 
 int slb_config_load(uint32_t model)
@@ -1048,6 +1160,14 @@ int slb_config_load(uint32_t model)
         return EIO;
     }
     
+    if (module_loaded and model == SLB_MODEL_TITAN) {
+        uint32_t backlight;
+
+        if (conf.find_u32("qc71.titan.backlight",backlight)) {
+            slb_kbd_backlight_set(model,backlight);
+        }
+    }
+
     if (module_loaded and model == SLB_MODEL_HERO_RPL_RTX) {
         uint32_t backlight;
 
@@ -1056,7 +1176,7 @@ int slb_config_load(uint32_t model)
         }
     }
 
-    if (module_loaded and model == SLB_MODEL_CREATIVE_15_A8_RTX) {
+    if (module_loaded and (model == SLB_MODEL_CREATIVE_15_A8_RTX or model == SLB_MODEL_CREATIVE_15_AI9_RTX5) ) {
         uint32_t backlight;
 
         if (conf.find_u32("qc71.creative.backlight",backlight)) {
@@ -1097,6 +1217,13 @@ int slb_config_store(uint32_t model)
         conf.set_u32("model",model);
         conf.set_u32("platform",platform);
 
+        if (module_loaded and model == SLB_MODEL_TITAN) {
+            uint32_t backlight = 0;
+
+            slb_kbd_backlight_get(model,&backlight);
+            conf.set_u32("qc71.titan.backlight",backlight);
+        }
+
         if (module_loaded and model == SLB_MODEL_HERO_RPL_RTX) {
             uint32_t backlight = 0;
 
@@ -1104,7 +1231,7 @@ int slb_config_store(uint32_t model)
             conf.set_u32("qc71.hero.backlight",backlight);
         }
 
-        if (module_loaded and model == SLB_MODEL_CREATIVE_15_A8_RTX) {
+        if (module_loaded and (model == SLB_MODEL_CREATIVE_15_A8_RTX or model == SLB_MODEL_CREATIVE_15_AI9_RTX5)) {
             uint32_t backlight = 0;
 
             slb_kbd_backlight_get(model,&backlight);
