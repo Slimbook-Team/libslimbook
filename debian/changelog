@@ -1,3 +1,10 @@
+libslimbook (1.24.0) noble; urgency=medium
+
+  * Fixed max brightness function
+  * added inc/dec brightness commands
+
+ -- Slimbook <dev@slimbook.es>  Thu, 11 Jun 2026 08:01:48 +0200
+
 libslimbook (1.23.0) noble; urgency=medium
 
   * Added backlight support for titan and creative-ai9 whenever hid-ite8291r3 is loaded
