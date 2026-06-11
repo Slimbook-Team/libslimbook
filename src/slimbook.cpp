@@ -1098,6 +1098,7 @@ int slb_kbd_brightness_set(uint32_t model, uint32_t brightness)
 int slb_kbd_brightness_max(uint32_t model, uint32_t* max)
 {
     string svalue;
+    *max = 0;
     
     if (model == 0) {
         model = slb_info_get_model();
@@ -1111,6 +1112,8 @@ int slb_kbd_brightness_max(uint32_t model, uint32_t* max)
         try {
             read_device(SYSFS_LED_KBD"max_brightness",svalue);
             *max = std::stoi(svalue,0,0);
+
+            return 0;
         }
         catch (...) {
             return EIO;
@@ -1127,6 +1130,8 @@ int slb_kbd_brightness_max(uint32_t model, uint32_t* max)
 
             read_device(device+"/max_brightness",svalue);
             *max = std::stoi(svalue,0,0);
+
+            return 0;
         }
         catch (...) {
             return EIO;
