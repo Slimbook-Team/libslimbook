@@ -177,8 +177,11 @@ void show_help()
     cout<<"info: display Slimbook model information"<<endl;
     cout<<"get-kbd-backlight: shows current keyboard backlight value in 32bit hexadecimal"<<endl;
     cout<<"set-kbd-backlight HEX: sets keyboard backlight as 32bit hexadecimal"<<endl;
-    cout<<"get-kbd-brightness: shows current keyboard brightness value"<<endl;
-    cout<<"set-kbd-brightness VALUE: sets keyboard brightness value [0-255]"<<endl;
+    cout<<"get-kbd-brightness: shows current keyboard brightness value in hexadecimal"<<endl;
+    cout<<"set-kbd-brightness HEX: sets keyboard brightness value"<<endl;
+    cout<<"get-kbd-max-brightness: shows maximum keyboard brightness value in hexadecimal"<<endl;
+    cout<<"dec-kbd-brightness: decrease keyboard brightness"<<endl;
+    cout<<"inc-kbd-brightness: increase keyboard brightness"<<endl;
     cout<<"get-fn-lock: gets Fn lock status"<<endl;
     cout<<"set-fn-lock VALUE: sets Fn lock [0-1]"<<endl;
     cout<<"toggle-fn-lock: toggle Fn lock"<<endl;
@@ -612,6 +615,71 @@ int main(int argc,char* argv[])
         
         cout<<std::hex<<std::setw(2)<<std::setfill('0')<<value<<endl;
         
+        return 0;
+    }
+
+    if (command == "get-kbd-max-brightness") {
+        uint32_t value;
+        int status = slb_kbd_brightness_max(0,&value);
+
+        if (status > 0) {
+            cerr<<"Failed to retrieve maximum keyboard brightness:"<<status<<endl;
+            return status;
+        }
+
+        cout<<std::hex<<std::setw(2)<<std::setfill('0')<<value<<endl;
+
+        return 0;
+    }
+
+    if (command == "dec-kbd-brightness") {
+        uint32_t current;
+
+        int status = slb_kbd_brightness_get(0,&current);
+
+        if (status > 0) {
+            cerr<<"Failed to retrieve current keyboard brightness:"<<status<<endl;
+            return status;
+        }
+
+        if (current > 0 ) {
+            status = slb_kbd_brightness_set(0,current - 1);
+
+            if (status > 0) {
+                cerr<<"Failed to set current keyboard brightness:"<<status<<endl;
+                return status;
+            }
+        }
+
+        return 0;
+    }
+
+    if (command == "inc-kbd-brightness") {
+        uint32_t max_brightness;
+        uint32_t current;
+        int status = slb_kbd_brightness_max(0,&max_brightness);
+
+        if (status > 0) {
+            cerr<<"Failed to retrieve maximum keyboard brightness:"<<status<<endl;
+            return status;
+        }
+
+        status = slb_kbd_brightness_get(0,&current);
+
+        if (status > 0) {
+            cerr<<"Failed to retrieve current keyboard brightness:"<<status<<endl;
+            return status;
+        }
+
+        if (current < max_brightness ) {
+            status = slb_kbd_brightness_set(0,current + 1);
+
+            if (status > 0) {
+                cerr<<"Failed to set current keyboard brightness:"<<status<<endl;
+                return status;
+            }
+        }
+
         return 0;
     }
     
