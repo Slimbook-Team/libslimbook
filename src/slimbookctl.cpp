@@ -21,6 +21,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "slimbook.h"
 #include "common.h"
 #include "amdsmu.h"
+#include "ite8291r3.h"
 
 #include "pci.h"
 #include <sys/stat.h>
@@ -857,6 +858,14 @@ int main(int argc,char* argv[])
         cout<<"sku:["<<replace_ugly_chars(product_sku)<<"]"<<endl;
         cout<<"vendor:["<<replace_ugly_chars(vendor)<<"]"<<endl;
         
+    }
+    
+    if (command == "test") {
+        vector<string> devices = ITE8291R3::list();
+        
+        for (string dev : devices) {
+            cout<<"-"<<dev<<endl;
+        }
     }
     
     return 0;
