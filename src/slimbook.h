@@ -17,6 +17,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
+#ifndef SLB_SLIMBOOK_H
+#define SLB_SLIMBOOK_H
 
 #include <stdint.h>
 #include <stddef.h>
@@ -348,3 +350,4 @@ extern "C" int slb_qc71_custom_tdp_set(uint32_t pl1, uint32_t pl2, uint32_t pl4)
 /* Gets custom mode status */
 extern "C" int slb_qc71_custom_mode_get(uint32_t* value);
 
+#endif
