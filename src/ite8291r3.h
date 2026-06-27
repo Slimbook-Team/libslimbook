@@ -21,6 +21,14 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #ifndef SLB_ITE8291R3_H
 #define SLB_ITE8291R3_H
 
+#define SLB_VENDOR_ID_ITE 0x048d
+#define ITE8291R3_HID_REPORT_LENGTH 9
+
+#define ITE8291R3_SET_EFFECT 8
+#define ITE8291R3_GET_EFFECT 136
+
+#include <linux/hidraw.h>
+
 #include <string>
 #include <map>
 #include <vector>
@@ -31,7 +39,23 @@ class ITE8291R3
 {
     public:
     
+    static struct hidraw_devinfo get_info(std::string device);
     static std::vector<std::string> list();
+    
+    ITE8291R3();
+    ITE8291R3(std::string device);
+    
+    virtual ~ITE8291R3();
+    
+    void fetch();
+    
+    uint32_t effect;
+    uint32_t brightness;
+    
+    private:
+    
+    std::string m_device;
+    bool m_ready;
 };
 
 #endif

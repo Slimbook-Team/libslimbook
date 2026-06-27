@@ -861,11 +861,9 @@ int main(int argc,char* argv[])
     }
     
     if (command == "test") {
-        vector<string> devices = ITE8291R3::list();
+        ITE8291R3 ite;
         
-        for (string dev : devices) {
-            cout<<"-"<<dev<<endl;
-        }
+        ite.fetch();
     }
     
     return 0;
