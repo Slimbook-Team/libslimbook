@@ -18,6 +18,7 @@ along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+#include "slimbook.h"
 #include "ite8291r3.h"
 
 #include <fcntl.h>
@@ -94,8 +95,10 @@ ITE8291R3::~ITE8291R3()
 {
 }
 
-void ITE8291R3::fetch()
+map<uint32_t,uint32_t> ITE8291R3::fetch()
 {
+    map<uint32_t,uint32_t> values;
+    
     char buffer[64];
     
     int fd = open(m_device.c_str(), O_RDWR | O_NONBLOCK);
@@ -109,7 +112,7 @@ void ITE8291R3::fetch()
         
         if (res < 0) {
             cerr<<"Failed to set GET_EFFECT command"<<endl;
-            return;
+            return values;
         }
         
         buffer[0] = 0;
@@ -117,16 +120,60 @@ void ITE8291R3::fetch()
         
         if (res < 0) {
             cerr<<"Failed to fetch feature report"<<endl;
-            return;
+            return values;
         }
         
-        effect = buffer[3];
-        brightness = buffer[5];
+        values[SLB_KBL_PROPERTY_EFFECT] = buffer[3];
+        values[SLB_KBL_PROPERTY_BRIGHTNESS] = buffer[5];
         
-        for (int n=0;n<res;n++) {
-            clog<<n<<":"<<std::hex<<(int)buffer[n]<<endl;
+        close(fd);
+    }
+    
+    return values;
+}
+
+void ITE8291R3::set_effect(uint32_t effect, map<uint32_t,uint32_t> properties)
+{
+    char buffer[64];
+    
+    int fd = open(m_device.c_str(), O_RDWR | O_NONBLOCK);
+    
+    if (fd > 0) {
+    
+        uint32_t brightness = properties[SLB_KBL_PROPERTY_BRIGHTNESS];
+        
+        switch (brightness) {
+            case SLB_KBL_BRIGHTNESS_OFF:
+                brightness = 0;
+            break;
+            
+            case SLB_KBL_BRIGHTNESS_FULL:
+                brightness = 0x32;
+            break;
+            
+            case SLB_KBL_BRIGHTNESS_CURRENT:
+                //TODO
+            break;
+        }
+        
+        buffer[0] = 0;
+        buffer[1] = ITE8291R3_SET_EFFECT;
+        buffer[2] = 0x02;
+        buffer[3] = effect;
+        buffer[4] = properties[SLB_KBL_PROPERTY_SPEED];
+        buffer[5] = brightness;
+        buffer[6] = properties[SLB_KBL_PROPERTY_COLOR];
+        buffer[7] = properties[SLB_KBL_PROPERTY_DIRECTION];
+        buffer[8] = properties[SLB_KBL_PROPERTY_SAVE];
+        
+        int res = ioctl(fd, HIDIOCSFEATURE(ITE8291R3_HID_REPORT_LENGTH + 1), buffer);
+        
+        if (res < 0) {
+            cerr<<"Failed to set SET_EFFECT command"<<endl;
+            return;
         }
         
         close(fd);
     }
+    
 }

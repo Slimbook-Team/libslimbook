@@ -142,6 +142,41 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_BAT_STATE_NOT_CHARGING      0x03
 #define SLB_BAT_STATE_FULL              0x04
 
+#define SLB_KBL_PROPERTY_EFFECT         0x01
+#define SLB_KBL_PROPERTY_BRIGHTNESS     0x02
+#define SLB_KBL_PROPERTY_COLOR          0x03
+#define SLB_KBL_PROPERTY_DIRECTION      0x04
+#define SLB_KBL_PROPERTY_SPEED          0x05
+#define SLB_KBL_PROPERTY_REACTIVE       0x06
+#define SLB_KBL_PROPERTY_SAVE           0x09
+
+#define SLB_KBL_EFFECT_NONE             0x00
+#define SLB_KBL_EFFECT_BREATHING        0x02
+#define SLB_KBL_EFFECT_WAVE             0x03
+#define SLB_KBL_EFFECT_RANDOM           0x04
+#define SLB_KBL_EFFECT_RAINBOW          0x05
+#define SLB_KBL_EFFECT_RIPPLE           0x06
+#define SLB_KBL_EFFECT_MARQUEE          0x09
+#define SLB_KBL_EFFECT_RAINDROP         0x0A
+#define SLB_KBL_EFFECT_AURORA           0x0E
+#define SLB_KBL_EFFECT_FIREWORKS        0x11
+#define SLB_KBL_EFFECT_SOLID            0x33
+
+#define SLB_KBL_COLOR_NONE              0x00
+#define SLB_KBL_COLOR_RED               0x01
+#define SLB_KBL_COLOR_ORANGE            0x02
+#define SLB_KBL_COLOR_YELLOW            0x03
+#define SLB_KBL_COLOR_GREEN             0x04
+#define SLB_KBL_COLOR_BLUE              0x05
+#define SLB_KBL_COLOR_TEAL              0x06
+#define SLB_KBL_COLOR_PURPLE            0x07
+#define SLB_KBL_COLOR_RANDOM            0x08
+
+#define SLB_KBL_BRIGHTNESS_CURRENT      0x00
+#define SLB_KBL_BRIGHTNESS_OFF          0x01
+#define SLB_KBL_BRIGHTNESS_FULL         0x02
+
+
 typedef struct {
     /* device size in bytes */
     uint64_t size;

@@ -864,6 +864,13 @@ int main(int argc,char* argv[])
         ITE8291R3 ite;
         
         ite.fetch();
+        
+        map<uint32_t,uint32_t> properties;
+        
+        properties[SLB_KBL_PROPERTY_COLOR] = SLB_KBL_COLOR_TEAL;
+        properties[SLB_KBL_PROPERTY_BRIGHTNESS] = SLB_KBL_BRIGHTNESS_FULL;
+        
+        ite.set_effect(SLB_KBL_EFFECT_MARQUEE, properties);
     }
     
     return 0;

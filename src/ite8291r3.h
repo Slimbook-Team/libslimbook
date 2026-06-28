@@ -47,10 +47,8 @@ class ITE8291R3
     
     virtual ~ITE8291R3();
     
-    void fetch();
-    
-    uint32_t effect;
-    uint32_t brightness;
+    std::map<uint32_t,uint32_t> fetch();
+    void set_effect(uint32_t effect, std::map<uint32_t,uint32_t> properties);
     
     private:
     
