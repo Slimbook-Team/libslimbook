@@ -50,4 +50,7 @@ uint32_t swap32(uint32_t data);
 /* Retrieves endianness 0 LE 1 BE */
 int32_t check_endianness(void);
 
+/* Splits a string */
+std::vector<std::string> split(std::string input,char sep);
+
 #endif

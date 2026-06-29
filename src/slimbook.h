@@ -149,6 +149,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_KBL_PROPERTY_SPEED          0x05
 #define SLB_KBL_PROPERTY_REACTIVE       0x06
 #define SLB_KBL_PROPERTY_SAVE           0x09
+#define SLB_KBL_PROPERTY_EOF            0xFF
 
 #define SLB_KBL_EFFECT_NONE             0x00
 #define SLB_KBL_EFFECT_BREATHING        0x02
@@ -324,6 +325,9 @@ extern "C" int slb_kbd_brightness_set(uint32_t model, uint32_t brightness);
 
 /* Gets maximum brightness value */
 extern "C" int slb_kbd_brightness_max(uint32_t model, uint32_t* max);
+
+/* Sets fancy keyboard effects */
+extern "C" int slb_kbd_effect_set(uint32_t moedl, uint32_t effect, uint32_t* properties);
 
 /* Loads configuration from disk to driver. ie: backlight color */
 extern "C" int slb_config_load(uint32_t model);

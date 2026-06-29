@@ -23,6 +23,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "common.h"
 #include "amdsmu.h"
 #include "pci.h"
+#include "ite8291r3.h"
 
 #include <cpuid.h>
 #include <sys/sysinfo.h>
@@ -156,35 +157,6 @@ string info_serial;
 uint32_t info_platform;
 uint32_t info_model;
 int32_t info_confidence;
-
-static vector<string> split(string input,char sep)
-{
-    vector<string> tmp;
-    bool knee = false;
-    string current;
-    
-    for (char c:input) {
-        
-        if (c != sep) {
-            current.push_back(c);
-            knee = true;
-        }
-        else {
-            if (knee == true) {
-                tmp.push_back(current);
-                current="";
-                knee = false;
-            }
-            
-        }
-    }
-    
-    if (current.size() > 0) {
-        tmp.push_back(current);
-    }
-    
-    return tmp;
-}
 
 static int min3i(int a,int b,int c)
 {
@@ -1140,6 +1112,43 @@ int slb_kbd_brightness_max(uint32_t model, uint32_t* max)
 
     /* this is workaround for rgb-keyboard on clevo based models */
     *max = 0xff;
+    
+    return 0;
+}
+
+int slb_kbd_effect_set(uint32_t model, uint32_t effect, uint32_t* properties)
+{
+    if (model == 0) {
+        model = slb_info_get_model();
+    }
+    
+    if (model == 0) {
+        return ENOENT;
+    }
+    
+    if (model == SLB_MODEL_TITAN or model == SLB_MODEL_CREATIVE_15_AI9_RTX5) {
+        try {
+            map<uint32_t,uint32_t> props;
+            
+            for (int n=0;n<32;n+=2) {
+                if (properties[n] == SLB_KBL_PROPERTY_EOF) {
+                    break;
+                }
+                //clog<<"property:"<<properties[n]<<" value:"<<properties[n+1]<<endl;
+                props[properties[n]] = properties[n+1];
+                
+            }
+            
+            ITE8291R3 ite;
+            
+            ite.set_effect(effect, props);
+                
+            return 0;
+        }
+        catch (...) {
+            return EIO;
+        }
+    }
     
     return 0;
 }

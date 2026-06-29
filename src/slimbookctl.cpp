@@ -860,17 +860,71 @@ int main(int argc,char* argv[])
         
     }
     
-    if (command == "test") {
-        ITE8291R3 ite;
+    if (command == "set-kbd-effect") {
+    
+        map<string,uint32_t> names = {
+            {"effect", SLB_KBL_PROPERTY_EFFECT},
+            {"brightness", SLB_KBL_PROPERTY_BRIGHTNESS},
+            {"color", SLB_KBL_PROPERTY_COLOR},
+            {"direction", SLB_KBL_PROPERTY_DIRECTION},
+            {"speed", SLB_KBL_PROPERTY_SPEED},
+            {"reactive", SLB_KBL_PROPERTY_REACTIVE},
+            {"save", SLB_KBL_PROPERTY_SAVE}
+        };
         
-        ite.fetch();
+        map<string, uint32_t> effects = {
+            {"breathing",SLB_KBL_EFFECT_BREATHING},
+            {"wave",SLB_KBL_EFFECT_WAVE},
+            {"random",SLB_KBL_EFFECT_RANDOM},
+            {"rainbow",SLB_KBL_EFFECT_RAINBOW},
+            {"ripple",SLB_KBL_EFFECT_RIPPLE},
+            {"marquee",SLB_KBL_EFFECT_MARQUEE},
+            {"raindrop",SLB_KBL_EFFECT_RAINDROP},
+            {"aurora",SLB_KBL_EFFECT_AURORA},
+            {"fireworks",SLB_KBL_EFFECT_FIREWORKS},
+            {"solid",SLB_KBL_EFFECT_SOLID}
+        };
         
-        map<uint32_t,uint32_t> properties;
+        map<string, uint32_t> colors = {
+            {"red", SLB_KBL_COLOR_RED},
+            {"orange", SLB_KBL_COLOR_ORANGE},
+            {"yellow", SLB_KBL_COLOR_YELLOW},
+            {"green", SLB_KBL_COLOR_GREEN},
+            {"blue", SLB_KBL_COLOR_BLUE},
+            {"teal", SLB_KBL_COLOR_TEAL},
+            {"purple", SLB_KBL_COLOR_PURPLE},
+            {"random", SLB_KBL_COLOR_RANDOM}
+        };
         
-        properties[SLB_KBL_PROPERTY_COLOR] = SLB_KBL_COLOR_TEAL;
-        properties[SLB_KBL_PROPERTY_BRIGHTNESS] = SLB_KBL_BRIGHTNESS_FULL;
+        vector<uint32_t> properties;
+        uint32_t effect = 0;
         
-        ite.set_effect(SLB_KBL_EFFECT_MARQUEE, properties);
+        for (int n = 2;n < argc;n++) {
+            vector<string> tmp = split(argv[n],':');
+            
+            if (tmp.size() > 1) {
+                string key = tmp[0];
+                string value = tmp[1];
+                properties.push_back(names[key]);
+                
+                if (key == "effect") {
+                    effect = effects[value];
+                    properties.push_back(effects[value]);
+                    continue;
+                }
+                
+                if (key == "color") {
+                    properties.push_back(colors[value]);
+                    continue;
+                }
+                
+                properties.push_back(std::stoi(value));
+            }
+            
+        }
+        
+        properties.push_back(SLB_KBL_PROPERTY_EOF);
+        return slb_kbd_effect_set(0,effect,properties.data());
     }
     
     return 0;
