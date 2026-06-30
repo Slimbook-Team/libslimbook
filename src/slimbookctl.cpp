@@ -896,6 +896,14 @@ int main(int argc,char* argv[])
             {"random", SLB_KBL_COLOR_RANDOM}
         };
         
+        map<string, uint32_t> directions = {
+            {"none", 0},
+            {"right", 1},
+            {"left", 2},
+            {"up",3},
+            {"down",4}
+        };
+        
         vector<uint32_t> properties;
         uint32_t effect = 0;
         
@@ -916,6 +924,10 @@ int main(int argc,char* argv[])
                 if (key == "color") {
                     properties.push_back(colors[value]);
                     continue;
+                }
+                
+                if (key == "direction") {
+                    properties.push_back(directions[value]);
                 }
                 
                 properties.push_back(std::stoi(value));

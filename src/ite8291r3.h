@@ -27,6 +27,9 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define ITE8291R3_SET_EFFECT 8
 #define ITE8291R3_GET_EFFECT 136
 
+#define ITE8291R3_ROWS 6
+#define ITE8291R3_COLS 21
+
 #include <linux/hidraw.h>
 
 #include <string>
@@ -50,7 +53,16 @@ class ITE8291R3
     std::map<uint32_t,uint32_t> fetch();
     void set_effect(uint32_t effect, std::map<uint32_t,uint32_t> properties);
     
+    void set_layout();
+    
+    const std::string device() const
+    {
+        return m_device;
+    }
+    
     private:
+    
+    uint8_t* m_layout;
     
     std::string m_device;
     bool m_ready;

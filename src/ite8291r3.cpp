@@ -151,8 +151,11 @@ void ITE8291R3::set_effect(uint32_t effect, map<uint32_t,uint32_t> properties)
                 brightness = 0x32;
             break;
             
-            case SLB_KBL_BRIGHTNESS_CURRENT:
-                //TODO
+            case SLB_KBL_BRIGHTNESS_CURRENT: {
+                    map<uint32_t,uint32_t> current = fetch();
+                    
+                    brightness = current[SLB_KBL_PROPERTY_BRIGHTNESS];
+                }
             break;
         }
         
@@ -163,7 +166,7 @@ void ITE8291R3::set_effect(uint32_t effect, map<uint32_t,uint32_t> properties)
         buffer[4] = properties[SLB_KBL_PROPERTY_SPEED];
         buffer[5] = brightness;
         buffer[6] = properties[SLB_KBL_PROPERTY_COLOR];
-        buffer[7] = properties[SLB_KBL_PROPERTY_DIRECTION];
+        buffer[7] = properties[SLB_KBL_PROPERTY_DIRECTION] | properties[SLB_KBL_PROPERTY_REACTIVE];
         buffer[8] = properties[SLB_KBL_PROPERTY_SAVE];
         
         int res = ioctl(fd, HIDIOCSFEATURE(ITE8291R3_HID_REPORT_LENGTH + 1), buffer);
@@ -175,5 +178,18 @@ void ITE8291R3::set_effect(uint32_t effect, map<uint32_t,uint32_t> properties)
         
         close(fd);
     }
+    
+}
+
+void ITE8291R3::set_layout()
+{
+    uint8_t* buffer = new buffer[ITE8291R3_COLS * 3];
+    
+    for (int n=0;n<ITE8291R3_COLS*3;n+=3) {
+        buffer[n] = 0x16;
+        buffer[n+1] = 0xff;
+        buffer[n+2] = n;
+    }
+    
     
 }
