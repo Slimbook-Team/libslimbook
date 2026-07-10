@@ -17,6 +17,8 @@ You should have received a copy of the GNU Lesser General Public License
 along with this program; if not, write to the Free Software Foundation,
 Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
+#ifndef SLB_SLIMBOOK_H
+#define SLB_SLIMBOOK_H
 
 #include <stdint.h>
 #include <stddef.h>
@@ -139,6 +141,42 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #define SLB_BAT_STATE_DISCHARGING       0x02
 #define SLB_BAT_STATE_NOT_CHARGING      0x03
 #define SLB_BAT_STATE_FULL              0x04
+
+#define SLB_KBL_PROPERTY_EFFECT         0x01
+#define SLB_KBL_PROPERTY_BRIGHTNESS     0x02
+#define SLB_KBL_PROPERTY_COLOR          0x03
+#define SLB_KBL_PROPERTY_DIRECTION      0x04
+#define SLB_KBL_PROPERTY_SPEED          0x05
+#define SLB_KBL_PROPERTY_REACTIVE       0x06
+#define SLB_KBL_PROPERTY_SAVE           0x09
+#define SLB_KBL_PROPERTY_EOF            0xFF
+
+#define SLB_KBL_EFFECT_NONE             0x00
+#define SLB_KBL_EFFECT_BREATHING        0x02
+#define SLB_KBL_EFFECT_WAVE             0x03
+#define SLB_KBL_EFFECT_RANDOM           0x04
+#define SLB_KBL_EFFECT_RAINBOW          0x05
+#define SLB_KBL_EFFECT_RIPPLE           0x06
+#define SLB_KBL_EFFECT_MARQUEE          0x09
+#define SLB_KBL_EFFECT_RAINDROP         0x0A
+#define SLB_KBL_EFFECT_AURORA           0x0E
+#define SLB_KBL_EFFECT_FIREWORKS        0x11
+#define SLB_KBL_EFFECT_SOLID            0x33
+
+#define SLB_KBL_COLOR_NONE              0x00
+#define SLB_KBL_COLOR_RED               0x01
+#define SLB_KBL_COLOR_ORANGE            0x02
+#define SLB_KBL_COLOR_YELLOW            0x03
+#define SLB_KBL_COLOR_GREEN             0x04
+#define SLB_KBL_COLOR_BLUE              0x05
+#define SLB_KBL_COLOR_TEAL              0x06
+#define SLB_KBL_COLOR_PURPLE            0x07
+#define SLB_KBL_COLOR_RANDOM            0x08
+
+#define SLB_KBL_BRIGHTNESS_CURRENT      0x00
+#define SLB_KBL_BRIGHTNESS_ZERO         0x01
+#define SLB_KBL_BRIGHTNESS_FULL         0x02
+
 
 typedef struct {
     /* device size in bytes */
@@ -288,6 +326,9 @@ extern "C" int slb_kbd_brightness_set(uint32_t model, uint32_t brightness);
 /* Gets maximum brightness value */
 extern "C" int slb_kbd_brightness_max(uint32_t model, uint32_t* max);
 
+/* Sets fancy keyboard effects */
+extern "C" int slb_kbd_effect_set(uint32_t moedl, uint32_t effect, uint32_t* properties);
+
 /* Loads configuration from disk to driver. ie: backlight color */
 extern "C" int slb_config_load(uint32_t model);
 
@@ -348,3 +389,4 @@ extern "C" int slb_qc71_custom_tdp_set(uint32_t pl1, uint32_t pl2, uint32_t pl4)
 /* Gets custom mode status */
 extern "C" int slb_qc71_custom_mode_get(uint32_t* value);
 
+#endif
