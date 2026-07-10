@@ -1,3 +1,9 @@
+libslimbook (1.25.0) resolute; urgency=medium
+
+  * Added support for ITE8291R3 effects and custom layouts
+
+ -- Slimbook <dev@slimbook.es>  Fri, 10 Jul 2026 11:36:41 +0200
+
 libslimbook (1.24.0) resolute; urgency=medium
 
   * Fixed max brightness function
