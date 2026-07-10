@@ -95,3 +95,33 @@ int32_t check_endianness(void){
 
     return *val == 0xEF;
 }
+
+vector<string> split(string input,char sep)
+{
+    vector<string> tmp;
+    bool knee = false;
+    string current;
+    
+    for (char c:input) {
+        
+        if (c != sep) {
+            current.push_back(c);
+            knee = true;
+        }
+        else {
+            if (knee == true) {
+                tmp.push_back(current);
+                current="";
+                knee = false;
+            }
+            
+        }
+    }
+    
+    if (current.size() > 0) {
+        tmp.push_back(current);
+    }
+    
+    return tmp;
+}
+

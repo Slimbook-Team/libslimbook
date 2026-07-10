@@ -21,6 +21,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include "slimbook.h"
 #include "common.h"
 #include "amdsmu.h"
+#include "ite8291r3.h"
 
 #include "pci.h"
 #include <sys/stat.h>
@@ -29,6 +30,7 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <sys/wait.h>
 #include <mntent.h>
 #include <unistd.h>
+#include <string.h>
 
 #include <iostream>
 #include <iomanip>
@@ -41,7 +43,8 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 #include <ctime>
 #include <sstream>
 #include <regex>
-#include <string.h>
+#include <chrono>
+#include <thread>
 
 #define SLB_REPORT_PRIVATE "SLB_REPORT_PRIVATE"
 #define SYS_AMDGPU "/sys/class/drm/card%d/device/"
@@ -182,6 +185,8 @@ void show_help()
     cout<<"get-kbd-max-brightness: shows maximum keyboard brightness value in hexadecimal"<<endl;
     cout<<"dec-kbd-brightness: decrease keyboard brightness"<<endl;
     cout<<"inc-kbd-brightness: increase keyboard brightness"<<endl;
+    cout<<"set-kbd-effect PROPERTIES: sets a keyboard effect given a property list"<<endl;
+    cout<<"set-kbd-animation FILE: loads an animation file"<<endl;
     cout<<"get-fn-lock: gets Fn lock status"<<endl;
     cout<<"set-fn-lock VALUE: sets Fn lock [0-1]"<<endl;
     cout<<"toggle-fn-lock: toggle Fn lock"<<endl;
@@ -192,6 +197,21 @@ void show_help()
     cout<<"report: creates a tar.gz with system information"<<endl;
     cout<<"report-full: same as report, but it also gathers some sensible data as MAC address or board serial number"<<endl;
     cout<<"help: show this help"<<endl;
+}
+
+void show_effect_help()
+{
+    cout<<"Available properties:"<<endl;
+    cout<<"effect: breathing, wave, rainbow, marquee, raindrop, aurora, fireworks, solid"<<endl;
+    cout<<"speed: [0-5]"<<endl;
+    cout<<"color: red, orange, yellow, green, blue, teal, purple, random"<<endl;
+    cout<<"reactive: [0-1]"<<endl;
+    cout<<"brightness: current, zero, full"<<endl;
+    cout<<"direction: none, right, left, up, down"<<endl;
+    cout<<"save: [0-1]"<<endl;
+    cout<<endl;
+    cout<<"example:"<<endl;
+    cout<<"slimbookctl set-kbd-effect effect:breathing speed:5 color:yellow"<<endl;
 }
 
 string get_info()
@@ -857,6 +877,206 @@ int main(int argc,char* argv[])
         cout<<"sku:["<<replace_ugly_chars(product_sku)<<"]"<<endl;
         cout<<"vendor:["<<replace_ugly_chars(vendor)<<"]"<<endl;
         
+    }
+    
+    if (command == "set-kbd-effect") {
+    
+        if (argc < 3) {
+            show_effect_help();
+            return 0;
+        }
+    
+        map<string,uint32_t> names = {
+            {"effect", SLB_KBL_PROPERTY_EFFECT},
+            {"brightness", SLB_KBL_PROPERTY_BRIGHTNESS},
+            {"color", SLB_KBL_PROPERTY_COLOR},
+            {"direction", SLB_KBL_PROPERTY_DIRECTION},
+            {"speed", SLB_KBL_PROPERTY_SPEED},
+            {"reactive", SLB_KBL_PROPERTY_REACTIVE},
+            {"save", SLB_KBL_PROPERTY_SAVE}
+        };
+        
+        map<string, uint32_t> effects = {
+            {"breathing",SLB_KBL_EFFECT_BREATHING},
+            {"wave",SLB_KBL_EFFECT_WAVE},
+            {"random",SLB_KBL_EFFECT_RANDOM},
+            {"rainbow",SLB_KBL_EFFECT_RAINBOW},
+            {"ripple",SLB_KBL_EFFECT_RIPPLE},
+            {"marquee",SLB_KBL_EFFECT_MARQUEE},
+            {"raindrop",SLB_KBL_EFFECT_RAINDROP},
+            {"aurora",SLB_KBL_EFFECT_AURORA},
+            {"fireworks",SLB_KBL_EFFECT_FIREWORKS},
+            {"solid",SLB_KBL_EFFECT_SOLID}
+        };
+        
+        map<string, uint32_t> colors = {
+            {"red", SLB_KBL_COLOR_RED},
+            {"orange", SLB_KBL_COLOR_ORANGE},
+            {"yellow", SLB_KBL_COLOR_YELLOW},
+            {"green", SLB_KBL_COLOR_GREEN},
+            {"blue", SLB_KBL_COLOR_BLUE},
+            {"teal", SLB_KBL_COLOR_TEAL},
+            {"purple", SLB_KBL_COLOR_PURPLE},
+            {"random", SLB_KBL_COLOR_RANDOM}
+        };
+        
+        map<string, uint32_t> directions = {
+            {"none", 0},
+            {"right", 1},
+            {"left", 2},
+            {"up",3},
+            {"down",4}
+        };
+        
+        map<string, uint32_t> brightness_levels = {
+            {"current", 0},
+            {"zero", 1},
+            {"full", 2}
+        };
+        
+        vector<uint32_t> properties;
+        uint32_t effect = 0;
+        
+        for (int n = 2;n < argc;n++) {
+            vector<string> tmp = split(argv[n],':');
+            
+            if (tmp.size() > 1) {
+                string key = tmp[0];
+                string value = tmp[1];
+                properties.push_back(names[key]);
+                
+                if (key == "effect") {
+                    effect = effects[value];
+                    properties.push_back(effects[value]);
+                    continue;
+                }
+                
+                if (key == "color") {
+                    properties.push_back(colors[value]);
+                    continue;
+                }
+                
+                if (key == "direction") {
+                    properties.push_back(directions[value]);
+                    continue;
+                }
+                
+                if (key == "brightness") {
+                    properties.push_back(brightness_levels[value]);
+                    continue;
+                }
+                
+                properties.push_back(std::stoi(value));
+            }
+            
+        }
+        
+        properties.push_back(SLB_KBL_PROPERTY_EOF);
+        return slb_kbd_effect_set(0,effect,properties.data());
+    }
+    
+    if (command == "set-kbd-animation") {
+        if (argc < 3) {
+            show_help();
+            return 1;
+        }
+
+        string path = argv[2];
+        
+        uint32_t model = slb_info_get_model();
+        
+        if ( !(model == SLB_MODEL_TITAN or model == SLB_MODEL_CREATIVE_15_AI9_RTX5)) {
+            cerr<<"Unsupported model"<<endl;
+            return 0;
+        }
+        
+        ITE8291R3 ite;
+        
+        bool ignoreline = false;
+        ifstream file;
+
+        file.open(path.c_str());
+        
+        while (file.good()) {
+            string line;
+            std::getline(file, line);
+            
+            vector<string> tokens = split(line,' ');
+            
+            if (tokens.size() == 0) {
+                continue;
+            }
+            
+            string opt = tokens[0];
+            
+            if (ignoreline) {
+                if (opt == "*/") {
+                    ignoreline = false;
+                }
+                continue;
+            }
+            
+            if (opt == "/*") {
+                continue;
+            }
+            
+            if (opt == "#") {
+                continue;
+            }
+            
+            if (opt == "pos") {
+                int x = std::stoi(tokens[1]);
+                int y = std::stoi(tokens[2]);
+                vector<string> tmp = split(tokens[3],',');
+                int r = std::stoi(tmp[0]);
+                int g = std::stoi(tmp[1]);
+                int b = std::stoi(tmp[2]);
+ 
+                ite.set_color(y,x,r,g,b);
+            }
+            
+            if (opt == "clear") {
+                ite.clear_layout();
+            }
+            
+            if (opt == "apply") {
+                ite.set_layout();
+            }
+            
+            if (opt == "wait") {
+                float seconds = std::stof(tokens[1]);
+                int ms = seconds * 1000;
+                std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+            }
+            
+            if (opt == "fill") {
+                vector<string> tmp = split(tokens[1],',');
+                int r = std::stoi(tmp[0]);
+                int g = std::stoi(tmp[1]);
+                int b = std::stoi(tmp[2]);
+                
+                ite.fill_layout(r,g,b);
+            }
+            
+            if (opt == "shift") {
+                int dx = std::stoi(tokens[1]);
+                int dy = std::stoi(tokens[2]);
+                
+                ite.shift_layout(dy,dx);
+            }
+
+            if (opt == "brightness") {
+                int value = std::stoi(tokens[1]);
+                ite.set_brightness(value);
+            }
+            /*
+            for (string token:tokens) {
+                clog<<"["<<token<<"]";
+            }
+            clog<<endl;
+            */
+        }
+        file.close();
     }
     
     return 0;
