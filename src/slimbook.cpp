@@ -49,6 +49,10 @@ using namespace std;
 #define MODULE_QC71 "qc71_laptop"
 #define MODULE_CLEVO "clevo_platform"
 
+#define RYZEN_SMU_PM_TABLE_PATH "/sys/kernel/ryzen_smu_drv/pm_table"
+
+#define AMD_PM_TABLE_PROP_U8_AT_OFFSET(base, offs) ((uint8_t)(*reinterpret_cast<const float*>((const uint8_t*)(base) + (offs))))
+
 #define SLB_SUCCESS 0
 
 #define SLB_MICROWATTS 1000000
@@ -632,8 +636,41 @@ slb_tdp_info_t _get_TDP_intel()
     return tdp;
 };
 
-/* Gets TDP from smu driver in PCI */
-slb_tdp_info_t _get_TDP_amd()
+/* Extracts the sustained/fast/slow TDP floats out of a raw PM table buffer. */
+static void _parse_TDP_amd(slb_tdp_info_t& tdp, const void* pm_table)
+{
+    tdp.sustained = AMD_PM_TABLE_PROP_U8_AT_OFFSET(pm_table, 0x0);
+    tdp.fast = AMD_PM_TABLE_PROP_U8_AT_OFFSET(pm_table, 0x8);
+    tdp.slow = AMD_PM_TABLE_PROP_U8_AT_OFFSET(pm_table, 0x10);
+}
+
+/*
+ * Reads the PM table from ryzen_smu's sysfs interface, avoiding both the /dev/mem mmap 
+ * (denied under strict /dev/mem protection) and the raw PCI writes in _request_addr(), 
+ * which conflicts with ryzen_smu's exclusive claim on the SMU device when that driver 
+ * is loaded.
+ */
+static slb_tdp_info_t _get_TDP_amd_ryzen_smu()
+{
+    slb_tdp_info_t tdp = {0};
+
+    ifstream pm_table_file(RYZEN_SMU_PM_TABLE_PATH, ios::binary);
+
+    if (pm_table_file) {
+        char buf[0x14] = {0};
+        pm_table_file.read(buf, sizeof(buf));
+
+        if (pm_table_file.gcount() >= (streamsize)sizeof(buf)) {
+            _parse_TDP_amd(tdp, buf);
+            tdp.type = SLB_TDP_TYPE_AMD;
+        }
+    }
+
+    return tdp;
+}
+
+/* Reads the PM table by mapping its physical DRAM address via /dev/mem. */
+static slb_tdp_info_t _get_TDP_amd_devmem()
 {
     slb_tdp_info_t tdp = {0};
 
@@ -663,16 +700,18 @@ slb_tdp_info_t _get_TDP_amd()
     }
 
     if(addr != (uint64_t)-1){
-        if(_map_dev_addr(addr)){
+        int map_errno = _map_dev_addr(addr);
+
+        if(map_errno){
+            clog << "libslimbook: failed to map /dev/mem at address 0x" << hex << addr
+                 << dec << " for TDP read: " << strerror(map_errno)
+                 << ". Try installing the ryzen-smu-dkms package for a TDP read path"
+                    " that doesn't require /dev/mem access." << endl;
             return tdp;
-        } 
+        }
         _refresh_table(design, &smu, smuargs);
 
-        #define get_prop_from_offs(addr, offs) ((uint8_t)(*(float*)((uintptr_t)*(addr) + (offs))))
-
-        tdp.sustained = get_prop_from_offs(phys_addr, 0x0);
-        tdp.fast = get_prop_from_offs(phys_addr, 0x8);
-        tdp.slow = get_prop_from_offs(phys_addr, 0x10);
+        _parse_TDP_amd(tdp, *phys_addr);
     }
 
     pci_cleanup(smu->dev);
@@ -682,6 +721,15 @@ slb_tdp_info_t _get_TDP_amd()
     tdp.type = SLB_TDP_TYPE_AMD;
 
     return tdp;
+}
+
+slb_tdp_info_t _get_TDP_amd()
+{
+    if (filesystem::exists(RYZEN_SMU_PM_TABLE_PATH)) {
+        return _get_TDP_amd_ryzen_smu();
+    }
+
+    return _get_TDP_amd_devmem();
 }
 
 static string _get_cpu_name(){
