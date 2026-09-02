@@ -51,7 +51,7 @@ using namespace std;
 
 #define RYZEN_SMU_PM_TABLE_PATH "/sys/kernel/ryzen_smu_drv/pm_table"
 
-#define AMD_PM_TABLE_PROP_U8_AT_OFFSET(base, offs) ((uint8_t)(*reinterpret_cast<const float*>((const uint8_t*)(base) + (offs))))
+#define AMD_PM_TABLE_PROP_AT_OFFSET(base, offs) ((uint8_t)(*reinterpret_cast<const float*>((const uint8_t*)(base) + (offs))))
 
 #define SLB_SUCCESS 0
 
@@ -600,7 +600,7 @@ uint64_t slb_info_available_memory()
 }
 
 /* Gets TDP from Zone 0 in CPU */
-slb_tdp_info_t _get_TDP_intel()
+static slb_tdp_info_t _get_TDP_intel()
 {
     #define INTEL_RAPL_PATH "/sys/class/powercap/intel-rapl/intel-rapl:0/"
     slb_tdp_info_t tdp = {0};
@@ -639,9 +639,9 @@ slb_tdp_info_t _get_TDP_intel()
 /* Extracts the sustained/fast/slow TDP floats out of a raw PM table buffer. */
 static void _parse_TDP_amd(slb_tdp_info_t& tdp, const void* pm_table)
 {
-    tdp.sustained = AMD_PM_TABLE_PROP_U8_AT_OFFSET(pm_table, 0x0);
-    tdp.fast = AMD_PM_TABLE_PROP_U8_AT_OFFSET(pm_table, 0x8);
-    tdp.slow = AMD_PM_TABLE_PROP_U8_AT_OFFSET(pm_table, 0x10);
+    tdp.sustained = AMD_PM_TABLE_PROP_AT_OFFSET(pm_table, 0x0);
+    tdp.fast = AMD_PM_TABLE_PROP_AT_OFFSET(pm_table, 0x8);
+    tdp.slow = AMD_PM_TABLE_PROP_AT_OFFSET(pm_table, 0x10);
 }
 
 /*
@@ -703,7 +703,7 @@ static slb_tdp_info_t _get_TDP_amd_devmem()
         int map_errno = _map_dev_addr(addr);
 
         if(map_errno){
-            clog << "libslimbook: failed to map /dev/mem at address 0x" << hex << addr
+            cerr << "libslimbook: failed to map /dev/mem at address 0x" << hex << addr
                  << dec << " for TDP read: " << strerror(map_errno)
                  << ". Try installing the ryzen-smu-dkms package for a TDP read path"
                     " that doesn't require /dev/mem access." << endl;
@@ -723,7 +723,7 @@ static slb_tdp_info_t _get_TDP_amd_devmem()
     return tdp;
 }
 
-slb_tdp_info_t _get_TDP_amd()
+static slb_tdp_info_t _get_TDP_amd()
 {
     if (filesystem::exists(RYZEN_SMU_PM_TABLE_PATH)) {
         return _get_TDP_amd_ryzen_smu();
@@ -771,7 +771,7 @@ slb_tdp_info_t slb_info_get_tdp_info()
     catch(...) {
         // no need to take actions
     }
-    
+
     return tdp;
 }
 
@@ -779,7 +779,7 @@ uint32_t slb_info_tdp_get(slb_tdp_info_t* info)
 {
     slb_tdp_info_t tdp = {0,0,0, .type = SLB_TDP_TYPE_UNKNOWN};
     int32_t cpu_type;
-    
+
     try {
         string name = _get_cpu_name();
 
