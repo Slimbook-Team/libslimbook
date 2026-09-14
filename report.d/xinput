@@ -4,5 +4,5 @@ if [ -z "$DISPLAY" ]
 then
     exit 200
 else
-    xinput list > $1 2>/dev/null
+    /usr/bin/xinput list > $1 2>/dev/null
 fi

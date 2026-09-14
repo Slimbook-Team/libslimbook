@@ -1,3 +1,3 @@
 #!/bin/sh
 
-journalctl --since "2 days ago" > $1
+/usr/bin/journalctl --since "2 days ago" > $1
