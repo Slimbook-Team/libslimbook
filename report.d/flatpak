@@ -2,7 +2,7 @@
 
 if [ -f /usr/bin/flatpak ]
 then
-    flatpak list > $1
+    /usr/bin/flatpak list > $1
 else
     exit 200
 fi

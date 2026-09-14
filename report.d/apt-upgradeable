@@ -2,7 +2,7 @@
 
 if [ -f /usr/bin/apt ] 
 then
-    apt list --upgradeable > $1 2>/dev/null
+    /usr/bin/apt list --upgradeable > $1 2>/dev/null
 else
     exit 200
 fi
