@@ -1,3 +1,11 @@
+libslimbook (1.26.1) noble; urgency=medium
+
+  * Fixed security risk executing external scripts
+  * Clearing rgb layout before starting animations
+  * eliasrm87: Added support for ryzen_smu driver where direct memory access is not allowed.
+
+ -- Slimbook <dev@slimbook.es>  Wed, 16 Sep 2026 16:54:50 +0200
+
 libslimbook (1.25.0) noble; urgency=medium
 
   * Added support for ITE8291R3 effects and custom layouts
