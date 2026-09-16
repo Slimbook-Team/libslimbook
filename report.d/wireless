@@ -4,6 +4,6 @@ if [ "${SLB_REPORT_PRIVATE}" = "1" ]
 then
 	exit 200
 else
-	nmcli device wifi list > $1
+	/usr/bin/nmcli device wifi list > $1
 fi
 

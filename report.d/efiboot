@@ -2,7 +2,7 @@
 
 if [ -f /usr/bin/efibootmgr ] 
 then
-    efibootmgr -v > $1 2>/dev/null
+    /usr/bin/efibootmgr -v > $1 2>/dev/null
 else
     exit 200
 fi

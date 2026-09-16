@@ -992,6 +992,12 @@ int main(int argc,char* argv[])
         
         ITE8291R3 ite;
         
+        map<uint32_t,uint32_t> properties;
+        properties[SLB_KBL_PROPERTY_EFFECT] = SLB_KBL_EFFECT_SOLID;
+        properties[SLB_KBL_PROPERTY_BRIGHTNESS] = SLB_KBL_BRIGHTNESS_FULL;
+        
+        ite.set_effect(SLB_KBL_EFFECT_SOLID,properties);
+        
         bool ignoreline = false;
         ifstream file;
 

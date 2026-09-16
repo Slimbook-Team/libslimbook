@@ -2,7 +2,7 @@
 
 if [ -f /usr/bin/apt ] 
 then
-    apt list --installed > $1 2>/dev/null
+    /usr/bin/apt list --installed > $1 2>/dev/null
 else
     exit 200
 fi
