@@ -1,3 +1,9 @@
+libslimbook (1.26.1) resolute; urgency=medium
+
+  * Fixed security risk executing external scripts
+
+ -- Slimbook <dev@slimbook.es>  Wed, 16 Sep 2026 16:41:55 +0200
+
 libslimbook (1.26.0) resolute; urgency=medium
 
   * Clearing rgb layout before starting animations
