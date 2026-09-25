@@ -1085,5 +1085,26 @@ int main(int argc,char* argv[])
         file.close();
     }
     
+    if (command == "set-ac-auto-boot") {
+        if (argc < 3) {
+            show_help();
+            return 1;
+        }
+
+        string value = argv[2];
+
+        uint32_t model = slb_info_get_model();
+
+        if ( (model != SLB_MODEL_CREATIVE_15_AI9_RTX5)) {
+            cerr<<"Unsupported model"<<endl;
+            return 0;
+        }
+
+        uint32_t ivalue = std::stoi(value,0,10);
+        uint32_t status = slb_qc71_ac_auto_boot_set(ivalue);
+
+        return status;
+    }
+
     return 0;
 }

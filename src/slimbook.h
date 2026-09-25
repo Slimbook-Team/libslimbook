@@ -389,4 +389,10 @@ extern "C" int slb_qc71_custom_tdp_set(uint32_t pl1, uint32_t pl2, uint32_t pl4)
 /* Gets custom mode status */
 extern "C" int slb_qc71_custom_mode_get(uint32_t* value);
 
+/* Gets AC auto boot flag */
+extern "C" int slb_qc71_ac_auto_boot_get(uint32_t* value);
+
+/* Sets AC auto boot flag */
+extern "C" int slb_qc71_ac_auto_boot_set(uint32_t value);
+
 #endif
