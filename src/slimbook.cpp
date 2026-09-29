@@ -1652,3 +1652,35 @@ int slb_qc71_custom_mode_get(uint32_t* value)
 
     return SLB_SUCCESS;
 }
+
+int slb_qc71_ac_auto_boot_get(uint32_t* value)
+{
+    if (value == nullptr) {
+        return EINVAL;
+    }
+
+    try {
+        string svalue;
+        read_device(SYSFS_QC71"ac_auto_boot",svalue);
+        *value = std::stoi(svalue,0,10);
+    }
+    catch (...) {
+        return EIO;
+    }
+
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_ac_auto_boot_set(uint32_t value)
+{
+    try {
+        stringstream ss;
+        ss<<value;
+        write_device(SYSFS_QC71"ac_auto_boot",ss.str());
+    }
+    catch (...) {
+        return EIO;
+    }
+
+    return SLB_SUCCESS;
+}
