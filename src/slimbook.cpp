@@ -695,18 +695,20 @@ static slb_tdp_info_t _get_TDP_amd_devmem()
 
     _get_design_amd(family, model, &design);
 
-    if(_request_addr(design, &addr, &smu, smuargs) == (uint32_t)-1){
+    if (_request_addr(design, &addr, &smu, smuargs) == (uint32_t)-1) {
         return tdp;
     }
 
-    if(addr != (uint64_t)-1){
+    if (addr != (uint64_t)-1) {
         int map_errno = _map_dev_addr(addr);
 
-        if(map_errno){
+        if (map_errno) {
+            /*
             cerr << "libslimbook: failed to map /dev/mem at address 0x" << hex << addr
                  << dec << " for TDP read: " << strerror(map_errno)
                  << ". Try installing the ryzen-smu-dkms package for a TDP read path"
                     " that doesn't require /dev/mem access." << endl;
+            */
             return tdp;
         }
         _refresh_table(design, &smu, smuargs);
@@ -1645,6 +1647,38 @@ int slb_qc71_custom_mode_get(uint32_t* value)
         string svalue;
         read_device(SYSFS_QC71"custom_mode",svalue);
         *value = std::stoi(svalue,0,10);
+    }
+    catch (...) {
+        return EIO;
+    }
+
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_ac_auto_boot_get(uint32_t* value)
+{
+    if (value == nullptr) {
+        return EINVAL;
+    }
+
+    try {
+        string svalue;
+        read_device(SYSFS_QC71"ac_auto_boot",svalue);
+        *value = std::stoi(svalue,0,10);
+    }
+    catch (...) {
+        return EIO;
+    }
+
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_ac_auto_boot_set(uint32_t value)
+{
+    try {
+        stringstream ss;
+        ss<<value;
+        write_device(SYSFS_QC71"ac_auto_boot",ss.str());
     }
     catch (...) {
         return EIO;
