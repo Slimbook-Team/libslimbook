@@ -1,8 +1,11 @@
 #!/bin/sh
 
-if [ -f /usr/bin/apt ] 
-then
-    /usr/bin/apt list --installed > $1 2>/dev/null
+OUTPUT="$1"
+
+if command -v dpkg-query >/dev/null 2>&1; then
+    dpkg-query -W >> "$OUTPUT" 2>/dev/null
+elif command -v apt >/dev/null 2>&1; then
+    apt list --installed >> "$OUTPUT" 2>/dev/null
 else
     exit 200
 fi
