@@ -45,6 +45,7 @@ using namespace std;
 #define SYSFS_QC71 "/sys/devices/platform/qc71_laptop/"
 #define SYSFS_CLEVO "/sys/devices/platform/clevo_platform/"
 #define SYSFS_LED_KBD "/sys/class/leds/rgb:kbd_backlight/"
+#define SYSFS_LED_LIGHTBAR "/sys/class/leds/qc71_laptop::lightbar/"
 
 #define MODULE_QC71 "qc71_laptop"
 #define MODULE_CLEVO "clevo_platform"
@@ -1683,6 +1684,121 @@ int slb_qc71_ac_auto_boot_set(uint32_t value)
     catch (...) {
         return EIO;
     }
+
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_lightbar_color_get(uint32_t* color)
+{
+    if(!filesystem::exists(SYSFS_LED_LIGHTBAR)) {
+        return EIO;
+    }
+
+    try {
+        string svalue;
+        read_device(SYSFS_LED_LIGHTBAR"color",svalue);
+        *color = std::stoi(svalue,0,10);
+    }
+    catch(...) {
+        return EIO;
+    }
+
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_lightbar_color_set(uint32_t color)
+{
+    if(!filesystem::exists(SYSFS_LED_LIGHTBAR)) {
+        return EIO;
+    }
+
+    try {
+        stringstream ss;
+        ss<<color;
+        write_device(SYSFS_LED_LIGHTBAR"color",ss.str());
+    }
+    catch(...) {
+        return EIO;
+    }
+
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_lightbar_rainwbow_get(uint32_t* value)
+{
+    if(!filesystem::exists(SYSFS_LED_LIGHTBAR)) {
+        return EIO;
+    }
+
+    try {
+        string svalue;
+        read_device(SYSFS_LED_LIGHTBAR"rainbow_mode",svalue);
+        *value = std::stoi(svalue,0,10);
+    }
+    catch(...) {
+        return EIO;
+    }
+
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_lightbar_rainwbow_set(uint32_t value)
+{
+    if(!filesystem::exists(SYSFS_LED_LIGHTBAR)) {
+        return EIO;
+    }
+
+    try {
+        stringstream ss;
+        ss<<value;
+        write_device(SYSFS_LED_LIGHTBAR"rainbow_mode",ss.str());
+    }
+    catch(...) {
+        return EIO;
+    }
+
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_lightbar_brightness_get(uint32_t* value)
+{
+    if(!filesystem::exists(SYSFS_LED_LIGHTBAR)) {
+        return EIO;
+    }
+
+    try {
+        string svalue;
+        read_device(SYSFS_LED_LIGHTBAR"brightness_s3",svalue);
+        *value = std::stoi(svalue,0,10);
+    }
+    catch(...) {
+        return EIO;
+    }
+
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_lightbar_brightness_set(uint32_t value)
+{
+    if(!filesystem::exists(SYSFS_LED_LIGHTBAR)) {
+        return EIO;
+    }
+
+    try {
+        stringstream ss;
+        ss<<value;
+        write_device(SYSFS_LED_LIGHTBAR"brightness_s3",ss.str());
+    }
+    catch(...) {
+        return EIO;
+    }
+
+    return SLB_SUCCESS;
+}
+
+int slb_qc71_lightbar_brightness_max(uint32_t* value)
+{
+    *value = 1;
 
     return SLB_SUCCESS;
 }

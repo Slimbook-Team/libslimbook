@@ -51,6 +51,18 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 using namespace std;
 
+const map<string,int> lightbar_color_codes = {
+{"white", 999},
+{"aqua", 799},
+{"teal", 688},
+{"blue", 9},
+{"purple", 909},
+{"red", 900},
+{"orange", 940},
+{"yellow", 990},
+{"green", 90}
+};
+
 string generate_id()
 {
     std::srand(std::time(nullptr));
@@ -189,6 +201,7 @@ void show_help()
     cout<<"set-kbd-animation FILE: loads an animation file"<<endl;
     cout<<"get-fn-lock: gets Fn lock status"<<endl;
     cout<<"set-fn-lock VALUE: sets Fn lock [0-1]"<<endl;
+    cout<<"set-ac-auto-boot VALUE: sets AC auto boot [0-1] here available"<<endl;
     cout<<"toggle-fn-lock: toggle Fn lock"<<endl;
     cout<<"get-custom-tdp: gets custom TDP (Where available)"<<endl;
     cout<<"set-custom-tdp PL1 PL2 PL4: sets custom TDP (Where available). Set all to zero to disable it"<<endl;
@@ -1112,6 +1125,20 @@ int main(int argc,char* argv[])
         uint32_t status = slb_qc71_ac_auto_boot_set(ivalue);
 
         return status;
+    }
+
+    if (command == "get-lightbar-color") {
+        uint32_t value;
+        int status = slb_qc71_lightbar_color_get(&value);
+
+        if (status > 0) {
+            cerr<<"Failed to retrieve lightbar color:"<<status<<endl;
+            return status;
+        }
+
+        cout<<value<<endl;
+
+        return 0;
     }
 
     return 0;

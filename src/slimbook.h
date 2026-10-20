@@ -395,4 +395,25 @@ extern "C" int slb_qc71_ac_auto_boot_get(uint32_t* value);
 /* Sets AC auto boot flag */
 extern "C" int slb_qc71_ac_auto_boot_set(uint32_t value);
 
+/* Gets QC71 lightbar color */
+extern "C" int slb_qc71_lightbar_color_get(uint32_t* color);
+
+/* Sets QC71 lightbar color */
+extern "C" int slb_qc71_lightbar_color_set(uint32_t color);
+
+/* Gets QC71 lightbar rainbow mode */
+extern "C" int slb_qc71_lightbar_rainwbow_get(uint32_t* value);
+
+/* Sets QC71 lightbar rainbow mode */
+extern "C" int slb_qc71_lightbar_rainwbow_set(uint32_t value);
+
+/* Gets QC71 lightbar brightness */
+extern "C" int slb_qc71_lightbar_brightness_get(uint32_t* value);
+
+/* Sets QC71 lightbar brightness */
+extern "C" int slb_qc71_lightbar_brightness_set(uint32_t value);
+
+/* Gets QC71 lightbar max brightness */
+extern "C" int slb_qc71_lightbar_brightness_max(uint32_t* value);
+
 #endif
