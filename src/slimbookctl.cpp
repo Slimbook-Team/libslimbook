@@ -202,6 +202,8 @@ void show_help()
     cout<<"get-fn-lock: gets Fn lock status"<<endl;
     cout<<"set-fn-lock VALUE: sets Fn lock [0-1]"<<endl;
     cout<<"set-ac-auto-boot VALUE: sets AC auto boot [0-1] here available"<<endl;
+    cout<<"set-lightbar-color VALUE: sets lightbar color [000-999] | [red | green | blue | yellow | orange | purple | teal | aqua | white ]"<<endl;
+    cout<<"get-lightbar-color: gets lightbar color"<<endl;
     cout<<"toggle-fn-lock: toggle Fn lock"<<endl;
     cout<<"get-custom-tdp: gets custom TDP (Where available)"<<endl;
     cout<<"set-custom-tdp PL1 PL2 PL4: sets custom TDP (Where available). Set all to zero to disable it"<<endl;
@@ -1139,6 +1141,31 @@ int main(int argc,char* argv[])
         cout<<value<<endl;
 
         return 0;
+    }
+    
+    if (command == "set-lightbar-color") {
+        if (argc < 3) {
+            show_help();
+            return 1;
+        }
+        
+        string value = argv[2];
+        uint32_t ivalue = 0;
+        
+        auto it = lightbar_color_codes.find(value);
+        if (it != lightbar_color_codes.end()) {
+            ivalue = it->second;
+        }
+        else {
+            ivalue = std::stoi(value,0,10);
+        }
+        
+        int status = slb_qc71_lightbar_color_set(ivalue);
+        
+        if (status > 0) {
+            cerr<<"Failed to set lightbar color:"<<status<<endl;
+            return status;
+        }
     }
 
     return 0;
