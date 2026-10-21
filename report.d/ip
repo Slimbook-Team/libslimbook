@@ -1,14 +1,15 @@
 #!/bin/sh
 
-if [ "${SLB_REPORT_PRIVATE}" = "1" ]
-then
-	printf "ip4:\n" > $1
-	/usr/sbin/ip --family inet addr > $1
-	
-	printf "ip6:\n" > $1
-	/usr/sbin/ip --family inet6 addr > $1
+OUTPUT="$1"
+
+if [ "${SLB_REPORT_PRIVATE}" = "1" ]; then
+    {
+        printf "ip4:\n"
+        /usr/sbin/ip --family inet addr
+
+        printf "\nip6:\n"
+        /usr/sbin/ip --family inet6 addr
+    } >> "$OUTPUT"
 else
-	/usr/sbin/ip addr > $1
+    /usr/sbin/ip addr >> "$OUTPUT"
 fi
-
-
