@@ -1,3 +1,9 @@
+libslimbook (1.28.0) noble; urgency=medium
+
+  * Added lightbar support, both api, cli and settings service
+
+ -- Slimbook <dev@slimbook.es>  Thu, 22 Oct 2026 10:32:40 +0200
+
 libslimbook (1.27.1) noble; urgency=medium
 
   * Silenced error accesing to /dev/mem
