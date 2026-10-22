@@ -1231,6 +1231,16 @@ int slb_config_load(uint32_t model)
         if (conf.find_u32("qc71.titan.backlight",backlight)) {
             slb_kbd_backlight_set(model,backlight);
         }
+
+        uint32_t lightbar_color;
+        if (conf.find_u32("qc71.titan.lightbar.color", lightbar_color)) {
+            slb_qc71_lightbar_color_set(lightbar_color);
+        }
+
+        uint32_t lightbar_rainbow;
+        if (conf.find_u32("qc71.titan.lightbar.rainbow", lightbar_rainbow)) {
+            slb_qc71_lightbar_rainbow_set(lightbar_rainbow);
+        }
     }
 
     if (module_loaded and model == SLB_MODEL_HERO_RPL_RTX) {
@@ -1287,6 +1297,15 @@ int slb_config_store(uint32_t model)
 
             slb_kbd_backlight_get(model,&backlight);
             conf.set_u32("qc71.titan.backlight",backlight);
+
+            uint32_t lightbar_color = 0;
+            slb_qc71_lightbar_color_get(&lightbar_color);
+            conf.set_u32("qc71.titan.lightbar.color", lightbar_color);
+
+            uint32_t lightbar_rainbow = 0;
+            slb_qc71_lightbar_rainbow_get(&lightbar_rainbow);
+            conf.set_u32("qc71.titan.lightbar.rainbow", lightbar_rainbow);
+
         }
 
         if (module_loaded and model == SLB_MODEL_HERO_RPL_RTX) {
@@ -1724,7 +1743,7 @@ int slb_qc71_lightbar_color_set(uint32_t color)
     return SLB_SUCCESS;
 }
 
-int slb_qc71_lightbar_rainwbow_get(uint32_t* value)
+int slb_qc71_lightbar_rainbow_get(uint32_t* value)
 {
     if(!filesystem::exists(SYSFS_LED_LIGHTBAR)) {
         return EIO;
@@ -1742,7 +1761,7 @@ int slb_qc71_lightbar_rainwbow_get(uint32_t* value)
     return SLB_SUCCESS;
 }
 
-int slb_qc71_lightbar_rainwbow_set(uint32_t value)
+int slb_qc71_lightbar_rainbow_set(uint32_t value)
 {
     if(!filesystem::exists(SYSFS_LED_LIGHTBAR)) {
         return EIO;

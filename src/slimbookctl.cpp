@@ -51,18 +51,6 @@ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 using namespace std;
 
-const map<string,int> lightbar_color_codes = {
-{"white", 999},
-{"aqua", 799},
-{"teal", 688},
-{"blue", 9},
-{"purple", 909},
-{"red", 900},
-{"orange", 940},
-{"yellow", 990},
-{"green", 90}
-};
-
 string generate_id()
 {
     std::srand(std::time(nullptr));
@@ -202,7 +190,7 @@ void show_help()
     cout<<"get-fn-lock: gets Fn lock status"<<endl;
     cout<<"set-fn-lock VALUE: sets Fn lock [0-1]"<<endl;
     cout<<"set-ac-auto-boot VALUE: sets AC auto boot [0-1] here available"<<endl;
-    cout<<"set-lightbar-color VALUE: sets lightbar color [000-999] | [red | green | blue | yellow | orange | purple | teal | aqua | white ]"<<endl;
+    cout<<"set-lightbar-color VALUE: sets lightbar color [000-999]"<<endl;
     cout<<"get-lightbar-color: gets lightbar color"<<endl;
     cout<<"toggle-fn-lock: toggle Fn lock"<<endl;
     cout<<"get-custom-tdp: gets custom TDP (Where available)"<<endl;
@@ -1152,18 +1140,78 @@ int main(int argc,char* argv[])
         string value = argv[2];
         uint32_t ivalue = 0;
         
-        auto it = lightbar_color_codes.find(value);
-        if (it != lightbar_color_codes.end()) {
-            ivalue = it->second;
-        }
-        else {
-            ivalue = std::stoi(value,0,10);
-        }
+        ivalue = std::stoi(value,0,10);
         
         int status = slb_qc71_lightbar_color_set(ivalue);
         
         if (status > 0) {
             cerr<<"Failed to set lightbar color:"<<status<<endl;
+            return status;
+        }
+    }
+
+    if (command == "get-lightbar-brightness") {
+        uint32_t value;
+        int status = slb_qc71_lightbar_brightness_get(&value);
+
+        if (status > 0) {
+            cerr<<"Failed to retrieve lightbar brightness:"<<status<<endl;
+            return status;
+        }
+
+        cout<<value<<endl;
+
+        return 0;
+    }
+
+    if (command == "set-lightbar-brightness") {
+        if (argc < 3) {
+            show_help();
+            return 1;
+        }
+
+        string value = argv[2];
+        uint32_t ivalue = 0;
+
+        ivalue = std::stoi(value,0,10);
+
+        int status = slb_qc71_lightbar_brightness_set(ivalue);
+
+        if (status > 0) {
+            cerr<<"Failed to set lightbar brightness:"<<status<<endl;
+            return status;
+        }
+    }
+
+    if (command == "get-lightbar-rainbow") {
+        uint32_t value;
+        int status = slb_qc71_lightbar_rainbow_get(&value);
+
+        if (status > 0) {
+            cerr<<"Failed to retrieve lightbar rainbow:"<<status<<endl;
+            return status;
+        }
+
+        cout<<value<<endl;
+
+        return 0;
+    }
+
+    if (command == "set-lightbar-rainbow") {
+        if (argc < 3) {
+            show_help();
+            return 1;
+        }
+
+        string value = argv[2];
+        uint32_t ivalue = 0;
+
+        ivalue = std::stoi(value,0,10);
+
+        int status = slb_qc71_lightbar_rainbow_set(ivalue);
+
+        if (status > 0) {
+            cerr<<"Failed to set lightbar rainbow:"<<status<<endl;
             return status;
         }
     }
