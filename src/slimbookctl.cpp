@@ -192,6 +192,10 @@ void show_help()
     cout<<"set-ac-auto-boot VALUE: sets AC auto boot [0-1] here available"<<endl;
     cout<<"set-lightbar-color VALUE: sets lightbar color [000-999]"<<endl;
     cout<<"get-lightbar-color: gets lightbar color"<<endl;
+    cout<<"set-lightbar-rainbow VALUE: sets lightbar rainbow mode [0-1]"<<endl;
+    cout<<"get-lightbar-rainbow: gets lightbar rainbow mode"<<endl;
+    cout<<"set-lightbar-brightness VALUE: sets lightbar brightness [0-1]"<<endl;
+    cout<<"get-lightbar-brightness: gets lightbar brightness"<<endl;
     cout<<"toggle-fn-lock: toggle Fn lock"<<endl;
     cout<<"get-custom-tdp: gets custom TDP (Where available)"<<endl;
     cout<<"set-custom-tdp PL1 PL2 PL4: sets custom TDP (Where available). Set all to zero to disable it"<<endl;

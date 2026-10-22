@@ -1241,6 +1241,12 @@ int slb_config_load(uint32_t model)
         if (conf.find_u32("qc71.titan.lightbar.rainbow", lightbar_rainbow)) {
             slb_qc71_lightbar_rainbow_set(lightbar_rainbow);
         }
+
+        uint32_t lightbar_brightness;
+        if (conf.find_u32("qc71.titan.lightbar.brightness", lightbar_brightness)) {
+            slb_qc71_lightbar_rainbow_set(lightbar_brightness);
+        }
+
     }
 
     if (module_loaded and model == SLB_MODEL_HERO_RPL_RTX) {
@@ -1305,6 +1311,10 @@ int slb_config_store(uint32_t model)
             uint32_t lightbar_rainbow = 0;
             slb_qc71_lightbar_rainbow_get(&lightbar_rainbow);
             conf.set_u32("qc71.titan.lightbar.rainbow", lightbar_rainbow);
+
+            uint32_t lightbar_brightness = 0;
+            slb_qc71_lightbar_brightness_get(&lightbar_brightness);
+            conf.set_u32("qc71.titan.lightbar.brightness", lightbar_brightness);
 
         }
 
@@ -1787,7 +1797,7 @@ int slb_qc71_lightbar_brightness_get(uint32_t* value)
 
     try {
         string svalue;
-        read_device(SYSFS_LED_LIGHTBAR"brightness_s3",svalue);
+        read_device(SYSFS_LED_LIGHTBAR"brightness",svalue);
         *value = std::stoi(svalue,0,10);
     }
     catch(...) {
@@ -1806,7 +1816,7 @@ int slb_qc71_lightbar_brightness_set(uint32_t value)
     try {
         stringstream ss;
         ss<<value;
-        write_device(SYSFS_LED_LIGHTBAR"brightness_s3",ss.str());
+        write_device(SYSFS_LED_LIGHTBAR"brightness",ss.str());
     }
     catch(...) {
         return EIO;
