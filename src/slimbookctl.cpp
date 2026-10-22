@@ -189,6 +189,13 @@ void show_help()
     cout<<"set-kbd-animation FILE: loads an animation file"<<endl;
     cout<<"get-fn-lock: gets Fn lock status"<<endl;
     cout<<"set-fn-lock VALUE: sets Fn lock [0-1]"<<endl;
+    cout<<"set-ac-auto-boot VALUE: sets AC auto boot [0-1] here available"<<endl;
+    cout<<"set-lightbar-color VALUE: sets lightbar color [000-999]"<<endl;
+    cout<<"get-lightbar-color: gets lightbar color"<<endl;
+    cout<<"set-lightbar-rainbow VALUE: sets lightbar rainbow mode [0-1]"<<endl;
+    cout<<"get-lightbar-rainbow: gets lightbar rainbow mode"<<endl;
+    cout<<"set-lightbar-brightness VALUE: sets lightbar brightness [0-1]"<<endl;
+    cout<<"get-lightbar-brightness: gets lightbar brightness"<<endl;
     cout<<"toggle-fn-lock: toggle Fn lock"<<endl;
     cout<<"get-custom-tdp: gets custom TDP (Where available)"<<endl;
     cout<<"set-custom-tdp PL1 PL2 PL4: sets custom TDP (Where available). Set all to zero to disable it"<<endl;
@@ -1112,6 +1119,105 @@ int main(int argc,char* argv[])
         uint32_t status = slb_qc71_ac_auto_boot_set(ivalue);
 
         return status;
+    }
+
+    if (command == "get-lightbar-color") {
+        uint32_t value;
+        int status = slb_qc71_lightbar_color_get(&value);
+
+        if (status > 0) {
+            cerr<<"Failed to retrieve lightbar color:"<<status<<endl;
+            return status;
+        }
+
+        cout<<value<<endl;
+
+        return 0;
+    }
+    
+    if (command == "set-lightbar-color") {
+        if (argc < 3) {
+            show_help();
+            return 1;
+        }
+        
+        string value = argv[2];
+        uint32_t ivalue = 0;
+        
+        ivalue = std::stoi(value,0,10);
+        
+        int status = slb_qc71_lightbar_color_set(ivalue);
+        
+        if (status > 0) {
+            cerr<<"Failed to set lightbar color:"<<status<<endl;
+            return status;
+        }
+    }
+
+    if (command == "get-lightbar-brightness") {
+        uint32_t value;
+        int status = slb_qc71_lightbar_brightness_get(&value);
+
+        if (status > 0) {
+            cerr<<"Failed to retrieve lightbar brightness:"<<status<<endl;
+            return status;
+        }
+
+        cout<<value<<endl;
+
+        return 0;
+    }
+
+    if (command == "set-lightbar-brightness") {
+        if (argc < 3) {
+            show_help();
+            return 1;
+        }
+
+        string value = argv[2];
+        uint32_t ivalue = 0;
+
+        ivalue = std::stoi(value,0,10);
+
+        int status = slb_qc71_lightbar_brightness_set(ivalue);
+
+        if (status > 0) {
+            cerr<<"Failed to set lightbar brightness:"<<status<<endl;
+            return status;
+        }
+    }
+
+    if (command == "get-lightbar-rainbow") {
+        uint32_t value;
+        int status = slb_qc71_lightbar_rainbow_get(&value);
+
+        if (status > 0) {
+            cerr<<"Failed to retrieve lightbar rainbow:"<<status<<endl;
+            return status;
+        }
+
+        cout<<value<<endl;
+
+        return 0;
+    }
+
+    if (command == "set-lightbar-rainbow") {
+        if (argc < 3) {
+            show_help();
+            return 1;
+        }
+
+        string value = argv[2];
+        uint32_t ivalue = 0;
+
+        ivalue = std::stoi(value,0,10);
+
+        int status = slb_qc71_lightbar_rainbow_set(ivalue);
+
+        if (status > 0) {
+            cerr<<"Failed to set lightbar rainbow:"<<status<<endl;
+            return status;
+        }
     }
 
     return 0;
