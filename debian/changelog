@@ -1,3 +1,9 @@
+libslimbook (1.28.1) noble; urgency=medium
+
+  * Fixed bug loading lightbar settings
+
+ -- Slimbook <dev@slimbook.es>  Fri, 23 Oct 2026 10:07:41 +0200
+
 libslimbook (1.28.0) noble; urgency=medium
 
   * Added lightbar support, both api, cli and settings service
