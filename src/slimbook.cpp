@@ -1244,7 +1244,7 @@ int slb_config_load(uint32_t model)
 
         uint32_t lightbar_brightness;
         if (conf.find_u32("qc71.titan.lightbar.brightness", lightbar_brightness)) {
-            slb_qc71_lightbar_rainbow_set(lightbar_brightness);
+            slb_qc71_lightbar_brightness_set(lightbar_brightness);
         }
 
     }
